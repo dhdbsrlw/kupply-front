@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, ReactNode } from 'react';
 import styled, { css, keyframes } from 'styled-components';
 
 /* 모달의 큰 틀 1) Wrapper - 2) DialogBox - 3) Backdrop 으로 구성 */
@@ -8,6 +8,7 @@ import styled, { css, keyframes } from 'styled-components';
 
 interface ModalProps {
   onClickToggleModal: () => void;
+  children: ReactNode; // Allow multiple children
   // 아무 인자를 받지 않고, void 를 return (=no return) 하는 함수
   // This kind of function is commonly used as a 'callback' or 'event handler' to specify what should happen when a modal is closed.
 }
@@ -31,8 +32,8 @@ export default function ModalLarge({ onClickToggleModal, children }: PropsWithCh
 
 // 모달창 위치 조정 목적의 컨테이너
 const ModalContainer = styled.div`
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 90vh;
   position: fixed;
   display: flex;
   align-items: center;
@@ -41,8 +42,8 @@ const ModalContainer = styled.div`
 
 // 모달 창 (흰 색 컨텐츠 창)
 const DialogBox = styled.dialog`
-  width: 818px; // *전체화면에 대해 크기 조정 필요
-  height: 918px; // *전체화면에 대해 크기 조정 필요
+  width: 42vw; // *전체화면에 대해 크기 조정 필요
+  height: 81vh; // *전체화면에 대해 크기 조정 필요
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -55,7 +56,7 @@ const DialogBox = styled.dialog`
   z-index: 10;
 `;
 
-// 모달 뒷 (검은) 배경
+// 모달 뒷 (검은) 배경 - 크기 문제 해결 필요
 const Backdrop = styled.div`
   width: 100%; // 100vw;
   height: 100%; // 100vh;

@@ -1,6 +1,8 @@
 /* eslint-disable no-restricted-globals */
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useCookies } from 'react-cookie';
 import Logo from '../../assets/Logo';
 import HeaderButton from '../../assets/buttons/header/HeaderButton';
 import MailButton from '../../assets/buttons/header/MailButton';
@@ -9,8 +11,8 @@ import LabelButton from '../../assets/buttons/LabelButton';
 
 const Wrapper = styled.div`
   align-items: center;
-  width: 100%;
-  max-width: 1920px;
+  width: 100vw;
+  //max-width: 1920px;
   height: 7.7%; // 96px; (96/1248 = 7.7)
   position: fixed;
   top: 0;
@@ -52,12 +54,13 @@ const LeftButtonsContainer = styled.div`
 
 export interface HeaderProps {
   logined: boolean;
+  setLogin: (state: boolean) => void;
 }
 
-export default function Header({ logined }: HeaderProps) {
+export default function Header({ logined, setLogin }: HeaderProps) {
   const navigate = useNavigate();
   const handleMenu1Click = () => {
-    navigate('/previous');
+    navigate('/archive');
   };
   const handleMenu2Click = () => {
     navigate('/myboard');
@@ -73,6 +76,22 @@ export default function Header({ logined }: HeaderProps) {
   };
   const handleLoginClick = () => {
     navigate('/login');
+  };
+
+  const [, , removeCookie] = useCookies(['accessToken']);
+
+  const onLogoutClick = async () => {
+    const url = 'http://localhost:8080/auth/logout';
+    try {
+      await axios.get(url);
+      removeCookie('accessToken', { path: '/' });
+      window.localStorage.clear();
+      setLogin(false);
+      navigate('/');
+    } catch (err) {
+      // 이후 수정 필요함.
+      alert(err);
+    }
   };
 
   return (
@@ -94,6 +113,9 @@ export default function Header({ logined }: HeaderProps) {
         </LeftButtonsContainer>
         {logined ? (
           <HeaderIconButtonContainer>
+            <LabelButton size="medium" buttonType="secondary" onClick={onLogoutClick}>
+              Log out
+            </LabelButton>
             <MailButton onClick={handleMessageClick} />
             <SettingButton onClick={handleSettingsClick} />
           </HeaderIconButtonContainer>

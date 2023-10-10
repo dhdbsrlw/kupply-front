@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import Typography from '../../assets/Typography';
 import MultiStepProgressBar from '../../assets/MultiStepProgressBar';
@@ -14,8 +14,9 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 1153px;
+  background-color: #fcfafb;
 `;
 
 const TitleWrapper = styled.div`
@@ -24,7 +25,7 @@ const TitleWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   padding-top: 45px;
-  padding-bottom: 48px;
+  padding-bottom: 25px;
 `;
 
 const FormWrapper = styled.div`
@@ -37,6 +38,7 @@ const FormWrapper = styled.div`
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.7);
   box-sizing: border-box;
+  margin-top: 25px;
 `;
 
 const StepIndicator = styled.div`
@@ -85,19 +87,9 @@ const AliasButtonsWrapper = styled.div`
   margin-top: 140px;
 `;
 
-const Dot = styled(Typography)`
-  display: flex;
-  margin-top: auto;
-`;
-
-const Dash = styled(Typography)`
-  display: flex;
-  margin-top: 28px;
-`;
-
 const VerifiBoxWrapper = styled.div`
   display: flex;
-  gap: 18px;
+  gap: 13px;
 `;
 
 export function SignUp4Page() {
@@ -105,7 +97,6 @@ export function SignUp4Page() {
   const navigate = useNavigate();
 
   /* Progress Bar 동작을 위한 리액트훅 및 함수 모음 (props로 전달) */
-  const steps = [1, 2, 3, 4, 5];
   const [currentStep, setCurrentStep] = useState<number>(4); // 회원가입 2 단계 페이지
   const [complete, setComplete] = useState<boolean>(false);
 
@@ -113,8 +104,18 @@ export function SignUp4Page() {
   const [passerState, setPasserState] = useState<'default' | 'clicked' | 'unactive'>('default');
   const [nextPathState, setNextPathState] = useState<string>('');
 
+  /*
+  //넘겨받은 데이터가 없는 경우 올바른 경로가 아니므로 main으로 돌려보낸다.
+  useEffect(() => {
+    if (!sessionStorage.getItem('nickname')) navigate('/');
+    else sessionStorage.removeItem('role');
+  }, []);*/
+
   /* 각 페이지마다 버튼 이벤트가 상이하기 때문에 개별 정의 */
   const handleNext = (nextPath: string) => {
+    //role을 sessionStorage에 적고, 다음 단계로 보낸다.
+    if (candidateState === 'clicked') sessionStorage.setItem('role', 'candidate');
+    else if (passerState === 'clicked') sessionStorage.setItem('role', 'passer');
     navigate(nextPath);
   };
 
@@ -138,14 +139,14 @@ export function SignUp4Page() {
     <Wrapper>
       <TitleWrapper>
         <Typography size="title1" style={{ lineHeight: '131.579%' }}>
-          환영합니다
+          환영합니다!
         </Typography>
         <Typography size="mediumText" style={{ opacity: '0.8', marginTop: '5px' }}>
           회원가입을 위한 몇가지 절차를 거친 후 다양한 서비스를 이용하세요.
         </Typography>
       </TitleWrapper>
       <div style={{ width: '976.8px', height: '30px' }}>
-        <MultiStepProgressBar steps={steps} currentStep={currentStep} complete={complete} />
+        <MultiStepProgressBar numberOfSteps={5} currentStep={currentStep} complete={complete} />
       </div>
       <FormWrapper>
         <ContentsTitleWrapper>
@@ -187,19 +188,27 @@ export function SignUp4PageCandidate() {
   const navigate = useNavigate();
 
   /* Progress Bar 동작을 위한 리액트훅 및 함수 모음 (props로 전달) */
-  const steps = [1, 2, 3, 4, 5];
   const [currentStep, setCurrentStep] = useState<number>(4); // 회원가입 2 단계 페이지
   const [complete, setComplete] = useState<boolean>(false);
 
   const [hopeMajor1, setHopeMajor1] = useState<string>('');
   const [hopeMajor2, setHopeMajor2] = useState<string>('');
-  const [GPA1, setGPA1] = useState<string>('');
-  const [GPA2, setGPA2] = useState<string>('');
-  const [GPA3, setGPA3] = useState<string>('');
-  const [hopeSemester1, setHopeSemester1] = useState<string>('');
-  const [hopeSemester2, setHopeSemester2] = useState<string>('');
-  const [hopeSemester3, setHopeSemester3] = useState<string>('');
+  const [GPA1, setGPA1] = useState<string>(sessionStorage.getItem('GPA')?.charAt(0) || '');
+  const [GPA2, setGPA2] = useState<string>(sessionStorage.getItem('GPA')?.charAt(2) || '');
+  const [GPA3, setGPA3] = useState<string>(sessionStorage.getItem('GPA')?.charAt(3) || '');
+  const [hopeSemester1, setHopeSemester1] = useState<string>(sessionStorage.getItem('hopeSemester')?.charAt(2) || '');
+  const [hopeSemester2, setHopeSemester2] = useState<string>(sessionStorage.getItem('hopeSemester')?.charAt(3) || '');
+  const [hopeSemester3, setHopeSemester3] = useState<string>(sessionStorage.getItem('hopeSemester')?.charAt(5) || '');
   const [nextButton, setNextButton] = useState<boolean>(false);
+
+  /*
+  //넘겨받은 데이터가 없는 경우 올바른 경로가 아니므로 main으로 돌려보낸다.
+  useEffect(() => {
+    if (!sessionStorage.getItem('role')) navigate('/');
+    sessionStorage.removeItem('secondMajor');
+    sessionStorage.removeItem('passedGPA');
+    sessionStorage.removeItem('passSemester');
+  }, []);*/
 
   useEffect(() => {
     if (
@@ -230,7 +239,11 @@ export function SignUp4PageCandidate() {
 
   /* 각 페이지마다 버튼 이벤트가 상이하기 때문에 개별 정의 */
   const handleNext = () => {
-    navigate('/signUp5');
+    sessionStorage.setItem('hopeMajor1', hopeMajor1);
+    sessionStorage.setItem('hopeMajor2', hopeMajor2);
+    sessionStorage.setItem('GPA', GPA1 + '.' + GPA2 + GPA3);
+    sessionStorage.setItem('hopeSemester', '20' + hopeSemester1 + hopeSemester2 + '-' + hopeSemester3);
+    navigate('/signup5');
   };
 
   const handlePrev = () => {
@@ -241,14 +254,14 @@ export function SignUp4PageCandidate() {
     <Wrapper>
       <TitleWrapper>
         <Typography size="title1" style={{ lineHeight: '131.579%' }}>
-          환영합니다
+          환영합니다!
         </Typography>
         <Typography size="mediumText" style={{ opacity: '0.8', marginTop: '5px' }}>
           회원가입을 위한 몇가지 절차를 거친 후 다양한 서비스를 이용하세요.
         </Typography>
       </TitleWrapper>
       <div style={{ width: '976.8px', height: '30px' }}>
-        <MultiStepProgressBar steps={steps} currentStep={currentStep} complete={complete} />
+        <MultiStepProgressBar numberOfSteps={5} currentStep={currentStep} complete={complete} />
       </div>
       <FormWrapper>
         <ContentsTitleWrapper>
@@ -290,7 +303,11 @@ export function SignUp4PageCandidate() {
             </div>
             <VerifiBoxWrapper>
               <VerificationBox name="gpa-1" value={GPA1} setValue={setGPA1} />
-              <Dot size="mediumText">.</Dot>
+              <div style={{ marginTop: 60 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="2" height="2" fill="none">
+                  <circle cx="1" cy="1" r="1" fill="#141414" />
+                </svg>
+              </div>
               <VerificationBox name="gpa-2" value={GPA2} setValue={setGPA2} />
               <VerificationBox name="gpa-3" value={GPA3} setValue={setGPA3} />
             </VerifiBoxWrapper>
@@ -305,7 +322,11 @@ export function SignUp4PageCandidate() {
             <VerifiBoxWrapper>
               <VerificationBox name="semester-1" value={hopeSemester1} setValue={setHopeSemester1}></VerificationBox>
               <VerificationBox name="semester-2" value={hopeSemester2} setValue={setHopeSemester2}></VerificationBox>
-              <Dash size="mediumText">-</Dash>
+              <div style={{ marginTop: 26 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="2" fill="none">
+                  <path stroke="#000" stroke-linecap="round" stroke-width="2" d="M1 1h10" />
+                </svg>
+              </div>
               <VerificationBox name="semester-3" value={hopeSemester3} setValue={setHopeSemester3}></VerificationBox>
             </VerifiBoxWrapper>
           </ContentsWrapper>
@@ -324,19 +345,23 @@ export function SignUp4PagePasser() {
   const navigate = useNavigate();
 
   /* Progress Bar 동작을 위한 리액트훅 및 함수 모음 (props로 전달) */
-  const steps = [1, 2, 3, 4, 5];
   const [currentStep, setCurrentStep] = useState<number>(4); // 회원가입 2 단계 페이지
   const [complete, setComplete] = useState<boolean>(false);
 
   const [doubleMajor, setDoubleMajor] = useState<string>('');
-  const [GPA1, setGPA1] = useState<string>('');
-  const [GPA2, setGPA2] = useState<string>('');
-  const [GPA3, setGPA3] = useState<string>('');
-  const [passSemester1, setPassSemester1] = useState<string>('');
-  const [passSemester2, setPassSemester2] = useState<string>('');
-  const [passSemester3, setPassSemester3] = useState<string>('');
+  const [GPA1, setGPA1] = useState<string>(sessionStorage.getItem('passedGPA')?.charAt(0) || '');
+  const [GPA2, setGPA2] = useState<string>(sessionStorage.getItem('passedGPA')?.charAt(2) || '');
+  const [GPA3, setGPA3] = useState<string>(sessionStorage.getItem('passedGPA')?.charAt(3) || '');
+  const [passSemester1, setPassSemester1] = useState<string>(sessionStorage.getItem('passSemester')?.charAt(2) || '');
+  const [passSemester2, setPassSemester2] = useState<string>(sessionStorage.getItem('passSemester')?.charAt(3) || '');
+  const [passSemester3, setPassSemester3] = useState<string>(sessionStorage.getItem('passSemester')?.charAt(5) || '');
   const [nextButton, setNextButton] = useState<boolean>(false);
 
+  /*
+  //넘겨받은 데이터가 없는 경우 올바른 경로가 아니므로 main으로 돌려보낸다.
+  useEffect(() => {
+    if (!sessionStorage.getItem('role')) navigate('/');
+  }, []);*/
   useEffect(() => {
     if (!!doubleMajor && !!GPA1 && !!GPA2 && !!GPA3 && !!passSemester1 && !!passSemester2 && !!passSemester3) {
       setNextButton(true);
@@ -346,7 +371,10 @@ export function SignUp4PagePasser() {
   }, [doubleMajor, GPA1, GPA2, GPA3, passSemester1, passSemester2, passSemester3]);
   /* 각 페이지마다 버튼 이벤트가 상이하기 때문에 개별 정의 */
   const handleNext = () => {
-    navigate('/signUp5');
+    sessionStorage.setItem('secondMajor', doubleMajor);
+    sessionStorage.setItem('passedGPA', GPA1 + '.' + GPA2 + GPA3);
+    sessionStorage.setItem('passSemester', '20' + passSemester1 + passSemester2 + '-' + passSemester3);
+    navigate('/signup5');
   };
 
   const handlePrev = () => {
@@ -365,7 +393,7 @@ export function SignUp4PagePasser() {
       </TitleWrapper>
 
       <div style={{ width: '976.8px', height: '30px' }}>
-        <MultiStepProgressBar steps={steps} currentStep={currentStep} complete={complete} />
+        <MultiStepProgressBar numberOfSteps={5} currentStep={currentStep} complete={complete} />
       </div>
       <FormWrapper>
         <ContentsTitleWrapper>
@@ -388,11 +416,13 @@ export function SignUp4PagePasser() {
               optionList={[
                 { value1: '경영학과', value2: '경영대학' },
                 { value1: '경제학과', value2: '정경대학' },
-                { value1: '통계학과', value2: '정경대학' },
-                { value1: '정치외교학과', value2: '정경대학' },
-                { value1: '국제학부', value2: '국제학부' },
-                { value1: '컴퓨터학과', value2: '정보대학' },
                 { value1: '심리학부', value2: '심리학부' },
+                { value1: '통계학과', value2: '정경대학' },
+                { value1: '수학과', value2: '이과대학' },
+                { value1: '화학과', value2: '이과대학' },
+                { value1: '미디어학부', value2: '미디어학부' },
+                { value1: '식품자원경제학과', value2: '생명과학대학' },
+                { value1: '컴퓨터학과', value2: '정보대학' },
               ]}
               value={doubleMajor}
               setValue={setDoubleMajor}
@@ -407,9 +437,13 @@ export function SignUp4PagePasser() {
             </div>
             <VerifiBoxWrapper>
               <VerificationBox name="gpa-1" value={GPA1} setValue={setGPA1} />
-              <Dot size="mediumText">.</Dot>
-              <VerificationBox name="gpa-2" value={GPA1} setValue={setGPA2} />
-              <VerificationBox name="gpa-3" value={GPA1} setValue={setGPA3} />
+              <div style={{ marginTop: 60 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="2" height="2" fill="none">
+                  <circle cx="1" cy="1" r="1" fill="#141414" />
+                </svg>
+              </div>
+              <VerificationBox name="gpa-2" value={GPA2} setValue={setGPA2} />
+              <VerificationBox name="gpa-3" value={GPA3} setValue={setGPA3} />
             </VerifiBoxWrapper>
           </ContentsWrapper>
           <ContentsWrapper>
@@ -422,7 +456,11 @@ export function SignUp4PagePasser() {
             <VerifiBoxWrapper>
               <VerificationBox name="semester-1" value={passSemester1} setValue={setPassSemester1}></VerificationBox>
               <VerificationBox name="semester-2" value={passSemester2} setValue={setPassSemester2}></VerificationBox>
-              <Dash size="mediumText">-</Dash>
+              <div style={{ marginTop: 26 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="2" fill="none">
+                  <path stroke="#000" stroke-linecap="round" stroke-width="2" d="M1 1h10" />
+                </svg>
+              </div>
               <VerificationBox name="semester-3" value={passSemester3} setValue={setPassSemester3}></VerificationBox>
             </VerifiBoxWrapper>
           </ContentsWrapper>

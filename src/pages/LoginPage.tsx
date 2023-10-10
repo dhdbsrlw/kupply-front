@@ -1,14 +1,16 @@
-import React from 'react';
-import styled from 'styled-components';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import axios from 'axios';
+import { useCookies } from 'react-cookie';
 import Typography from '../assets/Typography';
 import NextButton from '../assets/buttons/NextButton';
 import LoginModal from './LoginModal';
+import AlertMessage from '../assets/AlertMessage';
 
 const Wrapper = styled.div`
-  width: 100%;
-  height: 1511px;
+  width: 100vw;
+  height: 1153px;
   display: flex;
   justify-content: center;
   background-color: #fcfafb;
@@ -115,6 +117,7 @@ const PasswordField = styled.input<{ isFilled: boolean }>`
 
 const TextBox = styled.div`
   display: flex;
+  align-items: flex-end;
   width: 628px;
 `;
 
@@ -151,7 +154,12 @@ const Link = styled.button`
   text-transform: uppercase;
 `;
 
-function LoginPage() {
+export interface LoginPageProps {
+  setLogin: (state: boolean) => void;
+}
+
+function LoginPage(props: LoginPageProps) {
+  const { setLogin } = props;
   const navigate = useNavigate();
   const handleLink2Click = () => {
     navigate('/join');
@@ -161,9 +169,40 @@ function LoginPage() {
   const [password, setPassword] = useState<string>('');
   const [isChecked, setIsChecked] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [cookies, setCookies] = useCookies(['accessToken']);
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
+  };
+
+  // login API 접근
+  const onLoginClick = async () => {
+    const url = 'http://localhost:8080/auth/login';
+    try {
+      await axios
+        .post(url, {
+          email: ID,
+          password: password,
+          isRememberOn: isChecked,
+        })
+        .then((res) => {
+          const expireDate = new Date();
+          expireDate.setHours(expireDate.getHours() + 1);
+
+          setCookies('accessToken', res.data.data.accessToken, {
+            path: '/',
+            expires: expireDate,
+          });
+        });
+      //로그인 상태를 유지하기 위해 localStorage에 로그인 여부와 ID를 저장 후 login 상태를 true로 바꾸고 메인 페이지로 보낸다.
+      window.localStorage.setItem('isLogin', 'true');
+      window.localStorage.setItem('loginedUser', ID);
+      setLogin(true);
+      navigate('/');
+    } catch (err) {
+      // 이후 수정 필요함.
+      alert(err);
+    }
   };
 
   return (
@@ -173,15 +212,14 @@ function LoginPage() {
           <LogoImage src="../../design_image/logo.png" />
           <LogoText>쿠플라이</LogoText>
         </LogoBox>
-        <Typography size="mediumText" style={{ marginBottom: '85px' }}>
-          고려대학교 메일로 이용하는 쿠플라이의 모든 서비스
-        </Typography>
+        <Typography size="mediumText">고려대학교 메일로 이용하는 쿠플라이의 모든 서비스</Typography>
         <TextFieldWrapper>
-          <TextBox>
+          <TextBox style={{ height: '105px' }}>
             <Typography size="mediumText" bold="700">
               쿠플라이 아이디
             </Typography>
             <Typography size="mediumText">를 입력해주세요.</Typography>
+            <AlertMessage />
           </TextBox>
           <IDField
             placeholder="0000@korea.ac.kr"
@@ -221,7 +259,11 @@ function LoginPage() {
           </Link>
           <Link onClick={handleLink2Click}>회원가입</Link>
         </LinkBox>
-        <NextButton active={ID !== '' && password !== ''} disabled={ID === '' || password === ''}>
+        <NextButton
+          active={ID !== '' && password !== ''}
+          disabled={ID === '' || password === ''}
+          onClick={onLoginClick}
+        >
           로그인
         </NextButton>
       </LoginBox>
