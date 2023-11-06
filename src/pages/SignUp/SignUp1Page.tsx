@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
 import Typography from '../../assets/Typography';
@@ -13,12 +13,14 @@ import SignUpSmall from './modals/SignUpSmall';
 import SignUpLarge1 from './modals/SignUpLarge1';
 import SignUpLarge2 from './modals/SignUpLarge2';
 import SignUpLarge3 from './modals/SignUpLarge3';
+import client from '../../utils/httpClient';
 
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100vw;
+  max-width: 2560px;
   height: 1153px;
   background-color: #fcfafb;
 `;
@@ -28,7 +30,7 @@ const TitleWrapper = styled.div`
   width: 100%;
   flex-direction: column;
   align-items: center;
-  padding-top: 45px;
+  padding-top: 30px;
   padding-bottom: 25px;
 `;
 
@@ -93,8 +95,8 @@ const SubContentsWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 15px;
-  margin-top: 159.24px;
-  margin-bottom: 171px;
+  margin-top: 109px; // 159.24px;
+  margin-bottom: 121px; //171px;
 `;
 
 // 푸터 버튼과 동일 에셋이라고 한다.
@@ -122,12 +124,16 @@ const TextButton = styled.button`
   }
 `;
 export const sendEmail = async (email: string) => {
-  const url = 'http://localhost:8080/auth/sendEmail'; // 만든 API 주소로 바뀌어야 함.
+  const url = 'https://api.kupply.devkor.club/auth/sendEmail'; // 만든 API 주소로 바뀌어야 함.
   try {
     await axios.post(url, { email: email });
-  } catch (e) {
+    // await client.post('/auth/sendEmail', { email: email });
+    return true;
+  } catch (e: any) {
     //이 코드는 이메일이 이미 인증된, 즉 겹치는 경우를 처리한다.
-    alert(e);
+    alert(e.response.data.error.message);
+    console.log(e);
+    return false;
   }
 };
 
@@ -146,7 +152,17 @@ export default function SignUp1Page() {
   const [num4, setNum4] = useState<string>('');
   const [num5, setNum5] = useState<string>('');
   const [num6, setNum6] = useState<string>('');
+  const [isEntered, setIsEntered] = useState<boolean>(false);
   const [nextButton, setNextButton] = useState<boolean>(false);
+
+  const setBlank = () => {
+    setNum1('');
+    setNum2('');
+    setNum3('');
+    setNum4('');
+    setNum5('');
+    setNum6('');
+  };
 
   // verificationBox 관련
   useEffect(() => {
@@ -162,13 +178,22 @@ export default function SignUp1Page() {
   const [isOpenModal, setOpenModal] = useState<boolean>(false);
   // modal 2 - 3 email value 전달 관련
   const [email, setEmail] = useState<string>(sessionStorage.getItem('email') || '');
-  const [emailState, setEmailState] = useState<StateOptions>('default');
+  const [emailState, setEmailState] = useState<StateOptions>(sessionStorage.getItem('email') ? 'filled' : 'default');
   //sendNum이 바뀌거나 isOpenModal이 0, 3이 되면 timer 초기화
   const [sendNum, setSendNum] = useState<number>(0);
 
   // emailID를 받지 않은 상태라면 main으로 보내고, 아니라면 email을 받은 값으로 설정한다.
   useEffect(() => {
-    if (!sessionStorage.getItem('email')) navigate('/');
+    // /if (!sessionStorage.getItem('email')) navigate('/');
+    async function sendFirst(email: string) {
+      const result = await sendEmail(email);
+
+      if (!result) {
+        navigate('/login');
+      }
+    }
+
+    sendFirst(email);
   }, []);
 
   // small modal 관련
@@ -181,7 +206,9 @@ export default function SignUp1Page() {
       setSendNum(sendNum + 1);
       await sendEmail(email);
     }
+    setBlank();
   }, [isOpenModal]);
+
   // large modal 관련
   const onClickToggleLargeModal = useCallback(() => {
     setOpenModal(!isOpenModal);
@@ -192,16 +219,24 @@ export default function SignUp1Page() {
   //버튼 클릭 시 API에 요청하여 번호가 맞는지 인증하고, 맞을 시에만 다음 페이지로 간다.
   const handleNext = async () => {
     const entireCode = num1 + num2 + num3 + num4 + num5 + num6;
-    const url = 'http://localhost:8080/auth/certifyEmail'; // 만든 API 주소로 바뀌어야 함.
-    console.log(entireCode, email);
+    const url = 'https://api.kupply.devkor.club/auth/certifyEmail'; // 만든 API 주소로 바뀌어야 함.
     try {
-      //await axios.post(url, { email: email, code: entireCode });
+      await axios.post(url, { email: email, code: entireCode });
+      // await client.post('/auth/certifyEmail', { email: email, code: entireCode }).then();
 
       navigate('/signup2');
-    } catch (err) {
+    } catch (err: any) {
       //에러 메시지 등 다른 처리 필요
-      alert('올바른 인증번호가 아닙니다.');
+      alert(err.response.data.error.message);
     }
+  };
+
+  // 타이머 시간 초과시 처리 목적
+  const [timerExpired, setTimerExpired] = useState<boolean>(false);
+
+  const handleTimerExpired = () => {
+    setTimerExpired(true);
+    navigate('/');
   };
 
   return (
@@ -210,19 +245,22 @@ export default function SignUp1Page() {
         switch (currentModal) {
           case 0:
             return (
-              <SignUpSmall
-                currentModal={currentModal}
-                isOpenModal={isOpenModal}
-                setCurrentModal={setCurrentModal}
-                setOpenModal={setOpenModal}
-                onClickModal={onClickToggleSmallModal}
-              />
+              <div style={{ background: 'red', width: '100%', zIndex: 20 }}>
+                <SignUpSmall
+                  currentModal={currentModal}
+                  isOpenModal={isOpenModal}
+                  setCurrentModal={setCurrentModal}
+                  setOpenModal={setOpenModal}
+                  onClickModal={onClickToggleSmallModal}
+                />
+              </div>
             );
 
           case 1:
             return (
               <SignUpLarge1
                 email={email}
+                setBlank={setBlank}
                 currentModal={currentModal}
                 isOpenModal={isOpenModal}
                 setCurrentModal={setCurrentModal}
@@ -242,6 +280,7 @@ export default function SignUp1Page() {
                 emailState={emailState}
                 setEmail={setEmail}
                 setEmailState={setEmailState}
+                setBlank={setBlank}
               />
             );
 
@@ -291,7 +330,12 @@ export default function SignUp1Page() {
             </ContentsWrapper>
             <div style={{ display: 'flex', flexDirection: 'column-reverse' }}>
               <Typography size="largeText" color="#D85888">
-                <Timer setTime={3} sendNum={sendNum} currentModal={currentModal}></Timer>
+                <Timer
+                  setTime={3}
+                  sendNum={sendNum}
+                  currentModal={currentModal}
+                  onTimerExpired={handleTimerExpired}
+                ></Timer>
               </Typography>
             </div>
           </div>

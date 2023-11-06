@@ -1,94 +1,18 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Typography from '../../assets/Typography';
 import TableData from '../../assets/landingpage/TableData';
+import { ITableData } from '../../pages/LandingPage';
 
 type orderOptions = 'descending' | 'ascending';
+type tableProps = {
+  tableData: ITableData[];
+};
 
-export default function RankingTable() {
+export default function Table(props: tableProps) {
   //표의 데이터는 최초 한 번만 렌더링하도록 한다.
-  const data = useMemo(
-    () => [
-      {
-        rank: 1,
-        secondMajor: '경영대학',
-        recruitNumber: 12,
-        applyNumber: 32,
-        competition: 3.2,
-        pastCompetition: 3.59,
-        pastmean: 4.46,
-        interest: 56,
-        interestedNum: 1,
-      },
-      {
-        rank: 2,
-        secondMajor: '컴퓨터학과',
-        recruitNumber: 12,
-        applyNumber: 32,
-        competition: 3.2,
-        pastCompetition: 3.59,
-        pastmean: 4.46,
-        interest: 56,
-        interestedNum: 0,
-      },
-      {
-        rank: 3,
-        secondMajor: '심리학부',
-        recruitNumber: 12,
-        applyNumber: 32,
-        competition: 3.2,
-        pastCompetition: 3.59,
-        pastmean: 4.46,
-        interest: 56,
-        interestedNum: 2,
-      },
-      {
-        rank: 4,
-        secondMajor: '미디어학부',
-        recruitNumber: 12,
-        applyNumber: 32,
-        competition: 3.2,
-        pastCompetition: 3.59,
-        pastmean: 4.46,
-        interest: 56,
-        interestedNum: 3,
-      },
-      {
-        rank: 5,
-        secondMajor: '식품자원경제학과',
-        recruitNumber: 12,
-        applyNumber: 32,
-        competition: 3.2,
-        pastCompetition: 3.59,
-        pastmean: 4.46,
-        interest: 56,
-        interestedNum: 0,
-      },
-      {
-        rank: 6,
-        secondMajor: '경제학과',
-        recruitNumber: 12,
-        applyNumber: 32,
-        competition: 3.2,
-        pastCompetition: 3.59,
-        pastmean: 4.46,
-        interest: 56,
-        interestedNum: 0,
-      },
-      {
-        rank: 7,
-        secondMajor: '수학과',
-        recruitNumber: 12,
-        applyNumber: 32,
-        competition: 3.2,
-        pastCompetition: 3.59,
-        pastmean: 4.46,
-        interest: 56,
-        interestedNum: 0,
-      },
-    ],
-    [],
-  );
+  const data = props.tableData;
   const ascendingData = data.map((item) => ({ ...item, rank: data.length + 1 - item.rank })).reverse();
 
   //아래 toggle을 설정한다.
@@ -103,37 +27,51 @@ export default function RankingTable() {
     else setOrder('descending');
   };
 
+  const navigate = useNavigate();
+
+  const [isInfoVisible, setInfoVisible] = useState(false);
+
   return (
     <Wrapper>
-      <Typography color="#D85888" size="mediumText" style={{ textAlign: 'center', marginBottom: '13.5px' }}>
-        실시간 지원률
-      </Typography>
-      <Typography size="heading2" style={{ textAlign: 'center', marginBottom: '15px' }}>
-        쿠플라이 실시간 이중전공 모의지원 현황
-      </Typography>
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <KupplyApplyButton>
-          <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20" viewBox="0 0 21 20" fill="none">
-            <path
-              d="M18.8327 1.66699L9.66602 10.8337"
-              stroke="white"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M18.8327 1.66699L12.9993 18.3337L9.66602 10.8337L2.16602 7.50033L18.8327 1.66699Z"
-              stroke="white"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <Typography color="white" size="bodyText">
-            쿠플라이 모의지원 하러가기
-          </Typography>
-        </KupplyApplyButton>
-      </div>
+      <TitleWrapper>
+        <Typography
+          color="#D85888"
+          size="mediumText"
+          style={{ textAlign: 'center', marginBottom: '13.5px', marginTop: '130px' }}
+        >
+          실시간 지원률
+        </Typography>
+        <Typography size="heading2" style={{ textAlign: 'center', marginBottom: '15px' }}>
+          쿠플라이 실시간 이중전공 모의지원 현황
+        </Typography>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <KupplyApplyButton
+            onClick={() => {
+              navigate('/myboard');
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20" viewBox="0 0 21 20" fill="none">
+              <path
+                d="M18.8327 1.66699L9.66602 10.8337"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M18.8327 1.66699L12.9993 18.3337L9.66602 10.8337L2.16602 7.50033L18.8327 1.66699Z"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <Typography color="white" size="bodyText">
+              쿠플라이 모의지원 하러가기
+            </Typography>
+          </KupplyApplyButton>
+        </div>
+      </TitleWrapper>
       <TextWrapper>
         <ToggleOrder
           onClick={toggleOrder}
@@ -185,54 +123,59 @@ export default function RankingTable() {
         <HeaderData>최종정원</HeaderData>
         <HeaderData>지원 현황</HeaderData>
         <HeaderData>실시간 경쟁률</HeaderData>
-        <HeaderData>지난 경쟁률</HeaderData>
         <HeaderData>지난 합격자 평균</HeaderData>
         <HeaderData>
           <div style={{ display: 'flex', gap: '4px' }}>
             관심
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 20 21" fill="none">
-              <g clip-path="url(#clip0_4239_14474)">
-                <path
-                  d="M9.99935 19.2643C14.6017 19.2643 18.3327 15.5334 18.3327 10.931C18.3327 6.32862 14.6017 2.59766 9.99935 2.59766C5.39698 2.59766 1.66602 6.32862 1.66602 10.931C1.66602 15.5334 5.39698 19.2643 9.99935 19.2643Z"
-                  stroke="#A8A8A8"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M10.0078 7.59766L9.99948 7.59766"
-                  stroke="#A8A8A8"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M10.0078 14.2656L10.0078 10.9323"
-                  stroke="#A8A8A8"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </g>
-              <defs>
-                <clipPath id="clip0_4239_14474">
-                  <rect width="20" height="20" fill="white" transform="translate(0 0.931641)" />
-                </clipPath>
-              </defs>
-            </svg>
+            <InfoIcon onMouseEnter={() => setInfoVisible(true)} onMouseLeave={() => setInfoVisible(false)}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 20 21" fill="none">
+                <g clip-path="url(#clip0_4239_14474)">
+                  <path
+                    d="M9.99935 19.2643C14.6017 19.2643 18.3327 15.5334 18.3327 10.931C18.3327 6.32862 14.6017 2.59766 9.99935 2.59766C5.39698 2.59766 1.66602 6.32862 1.66602 10.931C1.66602 15.5334 5.39698 19.2643 9.99935 19.2643Z"
+                    stroke="#A8A8A8"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M10.0078 7.59766L9.99948 7.59766"
+                    stroke="#A8A8A8"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M10.0078 14.2656L10.0078 10.9323"
+                    stroke="#A8A8A8"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </g>
+                <defs>
+                  <clipPath id="clip0_4239_14474">
+                    <rect width="20" height="20" fill="white" transform="translate(0 0.931641)" />
+                  </clipPath>
+                </defs>
+              </svg>
+            </InfoIcon>
           </div>
-          <Info>
-            <InfoBody>사용자들의 희망 이중전공을 기준으로 집계된 것으로, 실제 지원과 차이가 있을 수 있습니다.</InfoBody>
-          </Info>
+          {isInfoVisible && (
+            <Info>
+              <InfoBody>
+                사용자들의 희망 이중전공을 기준으로 집계된 것으로, 실제 지원과 차이가 있을 수 있습니다.
+              </InfoBody>
+            </Info>
+          )}
         </HeaderData>
       </TableHeader>
       {isShowAll && order === 'descending'
-        ? data.map((row) => <TableData {...row}></TableData>)
+        ? data && data.map((row) => <TableData {...row}></TableData>)
         : !isShowAll && order === 'descending'
-        ? data.slice(0, 5).map((row) => <TableData {...row}></TableData>)
+        ? data && data.slice(0, 5).map((row) => <TableData {...row}></TableData>)
         : isShowAll && order === 'ascending'
-        ? ascendingData.map((row) => <TableData {...row}></TableData>)
-        : ascendingData.slice(0, 5).map((row) => <TableData {...row}></TableData>)}
+        ? ascendingData && ascendingData.map((row) => <TableData {...row}></TableData>)
+        : ascendingData && ascendingData.slice(0, 5).map((row) => <TableData {...row}></TableData>)}
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         {isShowAll ? (
           <svg
@@ -242,6 +185,7 @@ export default function RankingTable() {
             viewBox="0 0 50 51"
             fill="none"
             onClick={() => setisShowAll(false)}
+            cursor="pointer"
           >
             <path
               d="M37.5 31.2637L25 18.7637L12.5 31.2637"
@@ -259,6 +203,7 @@ export default function RankingTable() {
             viewBox="0 0 50 51"
             fill="none"
             onClick={() => setisShowAll(true)}
+            cursor="pointer"
           >
             <path
               d="M12.5 18.7637L25 31.2637L37.5 18.7637"
@@ -280,6 +225,21 @@ const Wrapper = styled.div`
   justify-content: center;
   width: 86%;
   background: rgba(255, 255, 255, 0.6);
+  margin-bottom: 600px;
+`;
+
+const TitleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 1) 15%,
+    rgba(255, 255, 255, 0) 95%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  z-index: 990;
 `;
 
 const KupplyApplyButton = styled.button`
@@ -327,6 +287,8 @@ const TableHeader = styled.div`
 `;
 
 const HeaderData = styled.div`
+  position: relative;
+  display: inline-block;
   color: #a8a8a8;
   font-family: Pretendard;
   font-size: 20px;
@@ -348,39 +310,47 @@ const HeaderData = styled.div`
 
   &:nth-child(3) {
     width: 125px;
+    padding-right: 15px;
   }
 
   &:nth-child(4) {
     width: 132px;
+    padding-right: 15px;
   }
 
   &:nth-child(5) {
     width: 165px;
-    padding-right: 94px;
+    padding-right: 105px;
   }
 
   &:nth-child(6) {
-    width: 130px;
+    width: 165px;
+    padding-right: 105px;
   }
 
   &:nth-child(7) {
-    width: 220px;
-    padding-right: 100px;
+    width: 100px;
   }
 
-  &:nth-child(8) {
-    position: relative;
-  }
+  //&:nth-child(8) {
+  // width: 400px;
+  //padding-right: 200px;
+  //position: relative;
+  //}
+  //
+`;
+
+const InfoIcon = styled.div`
+  height: auto;
+  width: auto;
+  position: relative;
+  display: inline-block;
 `;
 
 const Info = styled.div`
   position: absolute;
-  bottom: 50px;
-  right: -140px;
-  opacity: 0;
-  ${HeaderData}:hover & {
-    opacity: 1;
-  }
+  bottom: 54px;
+  right: -100px;
 `;
 
 const InfoBody = styled.div`

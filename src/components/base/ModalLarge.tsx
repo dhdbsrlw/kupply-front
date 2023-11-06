@@ -32,9 +32,10 @@ export default function ModalLarge({ onClickToggleModal, children }: PropsWithCh
 
 // 모달창 위치 조정 목적의 컨테이너
 const ModalContainer = styled.div`
-  width: 100vw;
-  height: 90vh;
+  width: 814px;
+  height: 780px;
   position: fixed;
+  margin-top: -50px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -42,8 +43,10 @@ const ModalContainer = styled.div`
 
 // 모달 창 (흰 색 컨텐츠 창)
 const DialogBox = styled.dialog`
-  width: 42vw; // *전체화면에 대해 크기 조정 필요
-  height: 81vh; // *전체화면에 대해 크기 조정 필요
+  width: 814px; // *전체화면에 대해 크기 조정 필요 43vw 814px
+  height: 750px; // 81vh; // *전체화면에 대해 크기 조정 필요 40vw750px
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -52,108 +55,66 @@ const DialogBox = styled.dialog`
   box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
   background-color: white;
-  // position: fixed; // 추가
+  // position: fixed;
+  // top: 75px;
   z-index: 10;
+
+  // --------------이하 스크롤바 관련 코드-------------
+
+  /* Webkit 기반의 브라우저 Chrome, Safari */
+  &::-webkit-scrollbar {
+    width: 1px;
+    height: 10px; /* 스크롤바 높이를 10px로 수정 */
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: transparent; /* 투명으로 설정 */
+    border-radius: 999px;
+    min-height: 30%;
+    box-shadow: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-button {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  .scrollbarWrapper {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 10px;
+    height: 100%;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  /* Firefox에서 스크롤바 숨기기 */
+  scrollbar-width: thin;
+
+  /* Internet Explorer에서 스크롤바 숨기기 */
+  -ms-overflow-style: -ms-autohiding-scrollbar;
 `;
 
 // 모달 뒷 (검은) 배경 - 크기 문제 해결 필요
 const Backdrop = styled.div`
   width: 100%; // 100vw;
   height: 100%; // 100vh;
-  // top: 0;
+  top: 0;
+  left: 0;
   position: fixed;
   z-index: 9;
   background: rgba(20, 16, 19, 0.55);
 `;
-
-/*
-interface ModalProps {
-  setIsOpen: Dispatch<boolean>;
-  children: ReactNode;
-}
-
-export default function Modal({ setIsOpen, children }: ModalProps) {
-  const closeModal = (e: TouchEvent<HTMLDivElement>) => {
-    if ((e?.target as Element)?.contains(e?.currentTarget)) {
-      setIsOpen(false);
-    }
-  };
-
-  return (
-    <Wrapper onTouchEnd={(e) => closeModal(e)}>
-      <div>{children}</div>
-      <Close onTouchEnd={() => setIsOpen(false)}>X</Close>
-    </Wrapper>
-  );
-}
-
-const Close = styled.button`
-  position: fixed;
-  top: 50px;
-  right: 50px;
-  color: white;
-  font-size: 22px;
-  cursor: pointer;
-`;
-
-const Wrapper = styled.div`
-  width: 100%;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  background: blue;
-`;
-*/
-
-/*
-const ModalWrapper = styled.div`
-  width: 100%; //100vw;
-  height: 100%; //100vh;
-  align-items: center;
-  justify-content: center;
-`;
-
-// 반영 완료
-const ModalBackground = styled.div`
-  background-color: rgba(20, 16, 19, 0.55);
-  width: 100%;
-  height: 100vh;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-`;
-
-const ModalContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 70px 50px 70px 50px;
-  box-sizing: border-box;
-  width: 57.3%;
-  height: 50px;
-  background-color: white;
-  box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.1);
-`;
-
-const useOpenModal = () => {
-  const [isOpenModal, setIsOpenModal] = useState(false);
-  const clickModal = () => {
-    setIsOpenModal(true);
-  };
-  const closeModal = () => {
-    setIsOpenModal(false);
-  };
-  return { isOpenModal, clickModal, closeModal };
-};
-
-export default function Modal({ title, alert, coin }: ModalProps) {
-  const { isOpenModal, clickModal, closeModal } = useOpenModal();
-
-  return (
-    <ModalBackground onClick={closeModal}>
-      <ModalContainer>모달창입니다.</ModalContainer>
-    </ModalBackground>
-  );
-}
-*/

@@ -9,12 +9,15 @@ import PrevButton from '../../assets/buttons/PrevButton';
 import Step4Button from '../../components/Step4Button';
 import VerificationBox from '../../assets/VerificationBox';
 import DropDown from '../../assets/dropdown/dropDown';
+import { majorAllList } from '../../common/majorAll';
+import { majorTargetList } from '../../common/majorTarget';
 
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100vw;
+  max-width: 2560px;
   height: 1153px;
   background-color: #fcfafb;
 `;
@@ -24,7 +27,7 @@ const TitleWrapper = styled.div`
   width: 100%;
   flex-direction: column;
   align-items: center;
-  padding-top: 45px;
+  padding-top: 30px;
   padding-bottom: 25px;
 `;
 
@@ -84,7 +87,7 @@ const ButtonsWrapper = styled.div`
 const AliasButtonsWrapper = styled.div`
   display: flex;
   gap: 18px;
-  margin-top: 140px;
+  margin-top: 70px;
 `;
 
 const VerifiBoxWrapper = styled.div`
@@ -104,12 +107,11 @@ export function SignUp4Page() {
   const [passerState, setPasserState] = useState<'default' | 'clicked' | 'unactive'>('default');
   const [nextPathState, setNextPathState] = useState<string>('');
 
-  /*
   //넘겨받은 데이터가 없는 경우 올바른 경로가 아니므로 main으로 돌려보낸다.
   useEffect(() => {
     if (!sessionStorage.getItem('nickname')) navigate('/');
     else sessionStorage.removeItem('role');
-  }, []);*/
+  }, []);
 
   /* 각 페이지마다 버튼 이벤트가 상이하기 때문에 개별 정의 */
   const handleNext = (nextPath: string) => {
@@ -183,7 +185,11 @@ export function SignUp4Page() {
   );
 }
 
+const optionList = majorTargetList;
+
 export function SignUp4PageCandidate() {
+  const [lastBoxRef, setLastBoxRef] = useState<any>(null);
+
   /* Prev/Next 버튼 동작에 따른 페이지(회원가입 단계) 이동 */
   const navigate = useNavigate();
 
@@ -201,6 +207,14 @@ export function SignUp4PageCandidate() {
   const [hopeSemester3, setHopeSemester3] = useState<string>(sessionStorage.getItem('hopeSemester')?.charAt(5) || '');
   const [nextButton, setNextButton] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (parseFloat(`${GPA1}.${GPA2}${GPA3}`) > 4.5) {
+      setGPA1('4');
+      setGPA2('5');
+      setGPA3('0');
+      if (lastBoxRef && lastBoxRef.current) lastBoxRef.current.focus();
+    }
+  }, [GPA1, GPA2, GPA3, lastBoxRef]);
   /*
   //넘겨받은 데이터가 없는 경우 올바른 경로가 아니므로 main으로 돌려보낸다.
   useEffect(() => {
@@ -227,28 +241,35 @@ export function SignUp4PageCandidate() {
     }
   }, [hopeMajor1, hopeMajor2, GPA1, GPA2, GPA3, hopeSemester1, hopeSemester2, hopeSemester3]);
 
-  const optionList = [
-    { value1: '경영학과', value2: '경영대학' },
-    { value1: '경제학과', value2: '정경대학' },
-    { value1: '통계학과', value2: '정경대학' },
-    { value1: '정치외교학과', value2: '정경대학' },
-    { value1: '국제학부', value2: '국제학부' },
-    { value1: '컴퓨터학과', value2: '정보대학' },
-    { value1: '심리학부', value2: '심리학부' },
-  ];
-
   /* 각 페이지마다 버튼 이벤트가 상이하기 때문에 개별 정의 */
   const handleNext = () => {
-    sessionStorage.setItem('hopeMajor1', hopeMajor1);
-    sessionStorage.setItem('hopeMajor2', hopeMajor2);
-    sessionStorage.setItem('GPA', GPA1 + '.' + GPA2 + GPA3);
-    sessionStorage.setItem('hopeSemester', '20' + hopeSemester1 + hopeSemester2 + '-' + hopeSemester3);
-    navigate('/signup5');
+    const GPA = +(GPA1 + '.' + GPA2 + GPA3);
+    const semesterYear = +(hopeSemester1 + hopeSemester2);
+
+    if (GPA > 4.5) {
+      alert('유효한 학점을 입력해주세요.');
+    } else if (
+      !(hopeSemester3 === '1' || hopeSemester3 === '2') ||
+      semesterYear < 23 ||
+      (semesterYear === 23 && hopeSemester3 === '1')
+    ) {
+      alert('유효한 희망 학기를 입력해주세요.');
+    } else {
+      sessionStorage.setItem('hopeMajor1', hopeMajor1);
+      sessionStorage.setItem('hopeMajor2', hopeMajor2);
+      sessionStorage.setItem('GPA', GPA1 + '.' + GPA2 + GPA3);
+      sessionStorage.setItem('hopeSemester', '20' + hopeSemester1 + hopeSemester2 + '-' + hopeSemester3);
+      navigate('/signup5');
+    }
   };
 
   const handlePrev = () => {
     navigate('/signUp4');
   };
+
+  // 2지망 '희망없음' 구현 목적
+  const updatedMajorTargetList = [...majorTargetList];
+  updatedMajorTargetList.unshift({ value1: '희망 없음', value2: '희망 없음' });
 
   return (
     <Wrapper>
@@ -282,13 +303,17 @@ export function SignUp4PageCandidate() {
             </div>
             <DropDown
               title="1지망 이중전공 선택"
-              optionList={optionList.filter((el) => el.value1 !== hopeMajor2)}
+              optionList={optionList.filter(
+                (el) => el.value1 !== hopeMajor2 && el.value1 !== sessionStorage.getItem('firstMajor'),
+              )}
               value={hopeMajor1}
               setValue={setHopeMajor1}
             />
             <DropDown
               title="2지망 이중전공 선택"
-              optionList={optionList.filter((el) => el.value1 !== hopeMajor1)}
+              optionList={updatedMajorTargetList.filter(
+                (el) => el.value1 !== hopeMajor1 && el.value1 !== sessionStorage.getItem('firstMajor'),
+              )}
               value={hopeMajor2}
               setValue={setHopeMajor2}
             />
@@ -309,7 +334,7 @@ export function SignUp4PageCandidate() {
                 </svg>
               </div>
               <VerificationBox name="gpa-2" value={GPA2} setValue={setGPA2} />
-              <VerificationBox name="gpa-3" value={GPA3} setValue={setGPA3} />
+              <VerificationBox name="gpa-3" value={GPA3} setValue={setGPA3} setRef={setLastBoxRef} />
             </VerifiBoxWrapper>
           </ContentsWrapper>
           <ContentsWrapper>
@@ -322,12 +347,13 @@ export function SignUp4PageCandidate() {
             <VerifiBoxWrapper>
               <VerificationBox name="semester-1" value={hopeSemester1} setValue={setHopeSemester1}></VerificationBox>
               <VerificationBox name="semester-2" value={hopeSemester2} setValue={setHopeSemester2}></VerificationBox>
-              <div style={{ marginTop: 26 }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="2" fill="none">
-                  <path stroke="#000" stroke-linecap="round" stroke-width="2" d="M1 1h10" />
-                </svg>
-              </div>
+              <Typography size={'normalText'} style={{ marginTop: '58px' }}>
+                년도
+              </Typography>
               <VerificationBox name="semester-3" value={hopeSemester3} setValue={setHopeSemester3}></VerificationBox>
+              <Typography size={'normalText'} style={{ marginTop: '58px' }}>
+                학기
+              </Typography>
             </VerifiBoxWrapper>
           </ContentsWrapper>
         </ContentsList>
@@ -341,6 +367,8 @@ export function SignUp4PageCandidate() {
 }
 
 export function SignUp4PagePasser() {
+  const [lastBoxRef, setLastBoxRef] = useState<any>(null);
+
   /* Prev/Next 버튼 동작에 따른 페이지(회원가입 단계) 이동 */
   const navigate = useNavigate();
 
@@ -369,12 +397,35 @@ export function SignUp4PagePasser() {
       setNextButton(false);
     }
   }, [doubleMajor, GPA1, GPA2, GPA3, passSemester1, passSemester2, passSemester3]);
+
+  useEffect(() => {
+    if (parseFloat(`${GPA1}.${GPA2}${GPA3}`) > 4.5) {
+      setGPA1('4');
+      setGPA2('5');
+      setGPA3('0');
+      if (lastBoxRef && lastBoxRef.current) lastBoxRef.current.focus();
+    }
+  }, [GPA1, GPA2, GPA3]);
+
   /* 각 페이지마다 버튼 이벤트가 상이하기 때문에 개별 정의 */
   const handleNext = () => {
-    sessionStorage.setItem('secondMajor', doubleMajor);
-    sessionStorage.setItem('passedGPA', GPA1 + '.' + GPA2 + GPA3);
-    sessionStorage.setItem('passSemester', '20' + passSemester1 + passSemester2 + '-' + passSemester3);
-    navigate('/signup5');
+    const GPA = +(GPA1 + '.' + GPA2 + GPA3);
+    const semesterYear = +(passSemester1 + passSemester2);
+
+    if (GPA > 4.5) {
+      alert('유효한 학점을 입력해주세요.');
+    } else if (
+      !(passSemester3 === '1' || passSemester3 === '2') ||
+      semesterYear > 23 ||
+      (semesterYear === 23 && passSemester3 === '2')
+    ) {
+      alert('유효한 진입 학기를 입력해주세요.');
+    } else {
+      sessionStorage.setItem('secondMajor', doubleMajor);
+      sessionStorage.setItem('passedGPA', GPA1 + '.' + GPA2 + GPA3);
+      sessionStorage.setItem('passSemester', '20' + passSemester1 + passSemester2 + '-' + passSemester3);
+      navigate('/signup5');
+    }
   };
 
   const handlePrev = () => {
@@ -413,17 +464,7 @@ export function SignUp4PagePasser() {
             </div>
             <DropDown
               title="진입 이중전공 선택"
-              optionList={[
-                { value1: '경영학과', value2: '경영대학' },
-                { value1: '경제학과', value2: '정경대학' },
-                { value1: '심리학부', value2: '심리학부' },
-                { value1: '통계학과', value2: '정경대학' },
-                { value1: '수학과', value2: '이과대학' },
-                { value1: '화학과', value2: '이과대학' },
-                { value1: '미디어학부', value2: '미디어학부' },
-                { value1: '식품자원경제학과', value2: '생명과학대학' },
-                { value1: '컴퓨터학과', value2: '정보대학' },
-              ]}
+              optionList={optionList}
               value={doubleMajor}
               setValue={setDoubleMajor}
             />
@@ -443,7 +484,7 @@ export function SignUp4PagePasser() {
                 </svg>
               </div>
               <VerificationBox name="gpa-2" value={GPA2} setValue={setGPA2} />
-              <VerificationBox name="gpa-3" value={GPA3} setValue={setGPA3} />
+              <VerificationBox name="gpa-3" value={GPA3} setValue={setGPA3} ref={lastBoxRef} />
             </VerifiBoxWrapper>
           </ContentsWrapper>
           <ContentsWrapper>
@@ -456,12 +497,13 @@ export function SignUp4PagePasser() {
             <VerifiBoxWrapper>
               <VerificationBox name="semester-1" value={passSemester1} setValue={setPassSemester1}></VerificationBox>
               <VerificationBox name="semester-2" value={passSemester2} setValue={setPassSemester2}></VerificationBox>
-              <div style={{ marginTop: 26 }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="2" fill="none">
-                  <path stroke="#000" stroke-linecap="round" stroke-width="2" d="M1 1h10" />
-                </svg>
-              </div>
+              <Typography size={'normalText'} style={{ marginTop: '58px' }}>
+                년도
+              </Typography>
               <VerificationBox name="semester-3" value={passSemester3} setValue={setPassSemester3}></VerificationBox>
+              <Typography size={'normalText'} style={{ marginTop: '58px' }}>
+                학기
+              </Typography>
             </VerifiBoxWrapper>
           </ContentsWrapper>
         </ContentsList>

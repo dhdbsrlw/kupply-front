@@ -17,6 +17,7 @@ export interface ModalProps {
   emailState: StateOptions;
   setEmail: (email: string) => void;
   setEmailState: (emailState: StateOptions) => void;
+  setBlank: () => void;
 }
 
 export default function SignUpLarge2(props: ModalProps) {
@@ -34,6 +35,7 @@ export default function SignUpLarge2(props: ModalProps) {
     emailState,
     setEmail,
     setEmailState,
+    setBlank,
   } = props;
 
   return (
@@ -64,7 +66,7 @@ export default function SignUpLarge2(props: ModalProps) {
               />
             </svg>
           </CloseButton>
-          <div style={{ height: '20.15%' }}></div>
+          <div style={{ height: '130px' }}></div>
           <AlertIconExclamation width="113px" height="113px" />
           <Typography size="largeText" color="#141414" style={{ marginTop: '25px' }}>
             인증번호를 받을 고려대 이메일 주소를 입력해주세요!
@@ -88,6 +90,7 @@ export default function SignUpLarge2(props: ModalProps) {
                 const IDPattern = /.+@korea\.ac\.kr$/;
                 if (IDPattern.test(email)) {
                   setCurrentModal(currentModal + 1);
+                  setBlank();
                   await sendEmail(email);
                 } else {
                   alert('형식에 맞지 않는 이메일 주소입니다.');
@@ -108,7 +111,7 @@ const Main = styled.main`
   flex-direction: column;
   align-items: center;
   position: fixed;
-  z-index: 20; // Modal.tsx 와 상이한 stacking context
+  z-index: 1005; // Modal.tsx 와 상이한 stacking context
 `;
 
 const CloseButton = styled.button`
@@ -118,7 +121,7 @@ const CloseButton = styled.button`
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 70px;
+  top: 50px;
   right: 50px;
 
   cursor: pointer;
@@ -131,7 +134,7 @@ const PrevButton = styled.button`
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 70px;
+  top: 50px;
   left: 50px;
 
   cursor: pointer;

@@ -12,7 +12,8 @@ import Carousel3 from './Carousel3';
 
 const Wrapper = styled.div`
   width: 100vw;
-  height: 50.48%; // 630px;
+  // max-width: 1920px;
+  height: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -22,8 +23,8 @@ const LeftArrow = styled.button`
   width: 32px; // 추후 픽셀 값 수정 필요
   height: 32px;
   position: absolute;
-  left: 6.66%; //100px;
-  top: 30.45%; // 380px; (380/1248 = 30.45)
+  left: 6.66vw; //100px;
+  top: 300px; // 380px; (380/1248 = 30.45)
   background-image: url('design_image/carousel/carousel_left_button.png');
   background-size: cover;
   border: none;
@@ -34,8 +35,8 @@ const RightArrow = styled.button`
   width: 32px;
   height: 32px;
   position: absolute;
-  right: 6.66%; // left: 1770px;
-  top: 30.45%; // 380px; (380/1248 = 30.45)
+  right: 6.66vw; // left: 1770px;
+  top: 300px; // 380px; (380/1248 = 30.45)
   background-image: url('design_image/carousel/carousel_right_button.png');
   background-size: cover;
   border: none;
@@ -46,8 +47,8 @@ const CircleButton = styled.button<{ name: number; current: number }>`
   width: ${(props) => (props.name === props.current ? '10px' : '8px')};
   height: ${(props) => (props.name === props.current ? '10px' : '8px')};
   position: absolute;
-  top: 52.08%; // 650px; (650/1248 = 52.08)
-  left: ${(props) => (props.name === 0 ? '920px' : props.name === 1 ? '950px' : '980px')};
+  top: 530px; // 650px; (650/1248 = 52.08)
+  left: ${(props) => (props.name === 0 ? '48%' : props.name === 1 ? '50%' : '52%')};
   border-radius: 50%;
   background-color: ${(props) =>
     props.name === props.current ? 'rgba(255, 255, 255, 1.00)' : 'rgba(255, 255, 255, 0.30)'};
@@ -58,6 +59,7 @@ const CircleButton = styled.button<{ name: number; current: number }>`
 function Carousel() {
   const [current, setCurrent] = useState(0);
   const getCurrent = (current: number) => {
+    if (current === -1) return 2;
     if (current === 3) return 0;
     else return current;
   };
@@ -75,6 +77,7 @@ function Carousel() {
     <Wrapper>
       <LeftArrow onClick={() => setCurrent(getCurrent(current - 1))} />
       {current === 0 ? <Carousel1></Carousel1> : current === 1 ? <Carousel2></Carousel2> : <Carousel3></Carousel3>}
+
       <RightArrow onClick={() => setCurrent(getCurrent(current + 1))} />
       <CircleButton onClick={() => setCurrent(0)} name={0} current={current} />
       <CircleButton onClick={() => setCurrent(1)} name={1} current={current} />

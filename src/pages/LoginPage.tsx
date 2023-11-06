@@ -7,10 +7,12 @@ import Typography from '../assets/Typography';
 import NextButton from '../assets/buttons/NextButton';
 import LoginModal from './LoginModal';
 import AlertMessage from '../assets/AlertMessage';
+import client from '../utils/httpClient';
+import Login2JoinModal from './Login2JoinModal';
 
 const Wrapper = styled.div`
   width: 100vw;
-  height: 1153px;
+  height: 933px;
   display: flex;
   justify-content: center;
   background-color: #fcfafb;
@@ -18,45 +20,20 @@ const Wrapper = styled.div`
 
 const LoginBox = styled.div`
   width: 816px;
-  height: 952px;
+  height: 752px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 76px;
+  margin-top: 36px;
   flex-shrink: 0;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.7);
 `;
 
-const LogoBox = styled.div`
-  display: flex;
-  height: 59.457px;
-  justify-content: center;
-  align-items: center;
-  gap: 10.955px;
-  flex-shrink: 0;
-  margin-top: 118px;
-  margin-bottom: 8px;
-`;
-
 const LogoImage = styled.img`
-  width: 60.615px;
-  height: 59.457px;
+  width: 240px;
+  height: 60px;
   flex-shrink: 0;
-`;
-
-const LogoText = styled.text`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #000;
-  font-family: 'GmarketSans';
-  font-size: 2.1em; // (참고) 폰트크기의 기본값은 16px
-  font-style: normal;
-  line-height: normal;
-  font-weight: 500;
-  letter-spacing: 1.177px;
 `;
 
 const TextFieldWrapper = styled.div`
@@ -64,7 +41,7 @@ const TextFieldWrapper = styled.div`
   width: 628px;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 34px;
+  margin-bottom: 24px;
 `;
 
 const IDField = styled.input<{ isFilled: boolean }>`
@@ -139,8 +116,8 @@ const LinkBox = styled.div`
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin-top: 66px;
-  margin-bottom: 87px;
+  margin-top: 36px;
+  margin-bottom: 37px;
 `;
 
 const Link = styled.button`
@@ -160,16 +137,18 @@ export interface LoginPageProps {
 
 function LoginPage(props: LoginPageProps) {
   const { setLogin } = props;
+  const [isOpenAlert, setOpenAlert] = useState<boolean>(false);
+
   const navigate = useNavigate();
   const handleLink2Click = () => {
-    navigate('/join');
+    navigate('/', { state: { showModal: true } });
   };
 
   const [ID, setID] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isChecked, setIsChecked] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [cookies, setCookies] = useCookies(['accessToken']);
+  const [cookies, setCookies] = useCookies(['accessToken', 'refreshToken', 'accessTokenExpire']);
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
@@ -177,7 +156,7 @@ function LoginPage(props: LoginPageProps) {
 
   // login API 접근
   const onLoginClick = async () => {
-    const url = 'http://localhost:8080/auth/login';
+    const url = 'https://api.kupply.devkor.club/auth/login';
     try {
       await axios
         .post(url, {
@@ -186,32 +165,33 @@ function LoginPage(props: LoginPageProps) {
           isRememberOn: isChecked,
         })
         .then((res) => {
-          const expireDate = new Date();
-          expireDate.setHours(expireDate.getHours() + 1);
-
-          setCookies('accessToken', res.data.data.accessToken, {
-            path: '/',
-            expires: expireDate,
-          });
+          if (res.data.data) {
+            localStorage.setItem('accessToken', res.data.data.accessToken);
+            localStorage.setItem('refreshToken', res.data.data.refreshToken);
+          }
         });
+
       //로그인 상태를 유지하기 위해 localStorage에 로그인 여부와 ID를 저장 후 login 상태를 true로 바꾸고 메인 페이지로 보낸다.
       window.localStorage.setItem('isLogin', 'true');
       window.localStorage.setItem('loginedUser', ID);
       setLogin(true);
       navigate('/');
-    } catch (err) {
+    } catch (err: any) {
       // 이후 수정 필요함.
-      alert(err);
+      setPassword('');
+      if (err.response.data.error.message) {
+        alert(err.response.data.error.message);
+      }
     }
   };
 
   return (
     <Wrapper>
+      {isOpenAlert ? (
+        <Login2JoinModal isOpenAlert={isOpenAlert} setOpenAlert={setOpenAlert} onClickModal={handleLink2Click} />
+      ) : null}
       <LoginBox>
-        <LogoBox>
-          <LogoImage src="../../design_image/logo.png" />
-          <LogoText>쿠플라이</LogoText>
-        </LogoBox>
+        <LogoImage src="../../design_image/Kupply_ver1.png" style={{ marginTop: '49px', marginBottom: '11.54px' }} />
         <Typography size="mediumText">고려대학교 메일로 이용하는 쿠플라이의 모든 서비스</Typography>
         <TextFieldWrapper>
           <TextBox style={{ height: '105px' }}>
@@ -226,6 +206,13 @@ function LoginPage(props: LoginPageProps) {
             value={ID}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setID(e.target.value);
+            }}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key === 'Enter') {
+                if (ID !== '' && password !== '') {
+                  onLoginClick();
+                }
+              }
             }}
             isFilled={ID !== ''}
           />
@@ -243,6 +230,13 @@ function LoginPage(props: LoginPageProps) {
             value={password}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setPassword(e.target.value);
+            }}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key === 'Enter') {
+                if (ID !== '' && password !== '') {
+                  onLoginClick();
+                }
+              }
             }}
             isFilled={password !== ''}
           />

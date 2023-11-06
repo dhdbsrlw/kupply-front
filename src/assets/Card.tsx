@@ -8,7 +8,7 @@ export interface CardsProps extends React.ComponentPropsWithRef<'div'> {
   eng: string;
   filter: string[];
   TO: number;
-  경쟁률: number;
+  pass: number;
   avg: number;
   min: number;
   semester: string;
@@ -39,14 +39,20 @@ const majorParamMapping = {
   'Department of Computer Science & Engineering': 'computer',
 };
 
-const Card = ({ name, eng, filter, TO, 경쟁률, avg, min, src, semester, titleSrc }: CardsProps) => {
+const Card = ({ name, eng, filter, TO, pass, avg, min, src, semester, titleSrc }: CardsProps) => {
   const [hover, setHover] = useState(false);
   const onHover = () => {
-    setHover(!hover);
+    setHover(true);
+  };
+  const onHoverOut = () => {
+    setHover(false);
   };
   const [svgHover, setSvgHover] = useState(false);
   const onSvgHover = () => {
-    setSvgHover(!svgHover);
+    setSvgHover(true);
+  };
+  const onSvgHoverOut = () => {
+    setSvgHover(false);
   };
   const navigate = useNavigate();
 
@@ -54,7 +60,7 @@ const Card = ({ name, eng, filter, TO, 경쟁률, avg, min, src, semester, title
     navigate('/archive/' + majorParamMapping[eng as MajorOptions]);
   };
   return (
-    <Container onMouseEnter={onHover} onMouseLeave={onHover}>
+    <Container onMouseEnter={onHover} onMouseLeave={onHoverOut}>
       <CardImage src={src} alt="card" hover={hover} />
       {hover ? (
         <>
@@ -64,13 +70,13 @@ const Card = ({ name, eng, filter, TO, 경쟁률, avg, min, src, semester, title
           <Hover모집정보>{semester} 모집정보</Hover모집정보>
           <HoverTOTitle>{semester.substring(2, 6)} 선발 인원</HoverTOTitle>
           <HoverTO>{TO}명</HoverTO>
-          <Hover경쟁률Title>경쟁률</Hover경쟁률Title>
-          <Hover경쟁률>{경쟁률} : 1</Hover경쟁률>
+          <Hover경쟁률Title>합격자</Hover경쟁률Title>
+          <Hover경쟁률>{pass}명</Hover경쟁률>
           <HoverMinTitle>합격자 최저 학점</HoverMinTitle>
           <HoverMin>{min}</HoverMin>
           <HoverAvgTitle>합격자 평균 학점</HoverAvgTitle>
           <HoverAvg>{avg}</HoverAvg>
-          <Svg onMouseEnter={onSvgHover} onMouseLeave={onSvgHover}>
+          <Svg onMouseEnter={onSvgHover} onMouseLeave={onSvgHoverOut}>
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
               <g clip-path="url(#clip0_3298_1700)">
                 <path
@@ -104,13 +110,13 @@ const Card = ({ name, eng, filter, TO, 경쟁률, avg, min, src, semester, title
                 </clipPath>
               </defs>
             </svg>
-          </Svg>{' '}
+          </Svg>
           {svgHover && (
             <>
               <HoverInfo>
-                쿠플라이에서 수집된 데이터 값으로,
+                쿠플라이에서 모의지원을 마친 지원자들 중 합격자 수로,
                 <br />
-                실제 경쟁률과 차이가 있을 수 있습니다.
+                실제 합격자 수와는 차이가 있을 수 있습니다.
               </HoverInfo>
               <SvgNotch>
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none">
@@ -174,6 +180,7 @@ const Card = ({ name, eng, filter, TO, 경쟁률, avg, min, src, semester, title
     </Container>
   );
 };
+
 const Button = styled.button`
   margin-top: 452px;
   margin-left: 66px;
@@ -213,8 +220,8 @@ const HoverInfo = styled.div`
   line-height: 16px;
   align-self: stretch;
   position: absolute;
-  margin-top: 184px;
-  margin-left: 204px;
+  margin-top: 185px;
+  margin-left: 140px;
 `;
 
 const SvgNotch = styled.div`
@@ -222,7 +229,7 @@ const SvgNotch = styled.div`
   height: 8px;
   flex-shrink: 0;
   fill: rgba(20, 20, 20, 0.6);
-  backdrop-filter: blur(27.182817459106445px);
+  position: absolute;
   margin-top: 229px;
   margin-left: 314px;
 `;
@@ -364,6 +371,7 @@ const HoverEng = styled.div`
   font-weight: 400;
   line-height: 18px;
   opacity: 0.8;
+  width: 250px;
   position: absolute;
   margin-top: 115px;
   margin-left: 120px;
@@ -399,8 +407,10 @@ const EngName = styled.div`
   margin-top: 487px;
 `;
 const Name = styled.div`
+  text-align: center;
+  width: 444px;
   position: absolute;
-  margin-left: 180px;
+
   margin-top: 451px;
   color: #141414;
   font-size: 24px;

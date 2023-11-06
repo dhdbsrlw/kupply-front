@@ -13,10 +13,11 @@ export interface ModalProps {
   setOpenModal: (isOpenModal: boolean) => void;
   onClickModal: () => void; // 함수
   email: string;
+  setBlank: () => void;
 }
 
 export default function SignUpLarge1(props: ModalProps) {
-  const { currentModal, isOpenModal, setCurrentModal, setOpenModal, onClickModal, email } = props;
+  const { currentModal, isOpenModal, setCurrentModal, setOpenModal, onClickModal, email, setBlank } = props;
 
   return (
     <Main>
@@ -36,7 +37,7 @@ export default function SignUpLarge1(props: ModalProps) {
               />
             </svg>
           </CloseButton>
-          <div style={{ height: '20.15%' }}></div>
+          <div style={{ height: '130px' }}></div>
           <AlertIconExclamation width="113px" height="113px" />
           <Typography size="largeText" color="#141414" style={{ marginTop: '25px' }}>
             아직 인증번호를 받지 못하셨나요?
@@ -48,6 +49,7 @@ export default function SignUpLarge1(props: ModalProps) {
             <VerificationButton
               onClick={async () => {
                 setCurrentModal(currentModal + 2);
+                setBlank();
                 await sendEmail(email);
               }}
             >
@@ -74,7 +76,7 @@ const Main = styled.main`
   flex-direction: column;
   align-items: center;
   position: fixed;
-  z-index: 20; // Modal.tsx 와 상이한 stacking context
+  z-index: 1005; // Modal.tsx 와 상이한 stacking context
 `;
 
 const CloseButton = styled.button`
@@ -84,21 +86,8 @@ const CloseButton = styled.button`
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 70px;
+  top: 50px;
   right: 50px;
-
-  cursor: pointer;
-`;
-
-const PrevButton = styled.button`
-  display: flex;
-  width: 60px;
-  height: 60px;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  top: 70px;
-  left: 50px;
 
   cursor: pointer;
 `;

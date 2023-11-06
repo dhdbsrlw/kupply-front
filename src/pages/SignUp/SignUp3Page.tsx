@@ -28,6 +28,7 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: center;
   width: 100vw;
+  max-width: 2560px;
   height: 1153px;
   background-color: #fcfafb;
 `;
@@ -37,7 +38,7 @@ const TitleWrapper = styled.div`
   width: 100%;
   flex-direction: column;
   align-items: center;
-  padding-top: 45px;
+  padding-top: 30px;
   padding-bottom: 25px;
 `;
 
@@ -148,7 +149,9 @@ export default function SignUp3Page() {
   const [password2, setPassword2] = useState<string>('');
   const [password2State, setPassword2State] = useState<StateOptions>('default');
   const [nickname, setNickname] = useState<string>(sessionStorage.getItem('nickname') || '');
-  const [nicknameState, setnicknameState] = useState<StateOptions>('default');
+  const [nicknameState, setnicknameState] = useState<StateOptions>(
+    sessionStorage.getItem('nickname') ? 'filled' : 'default',
+  );
   const [nicknameCheck, setNicknameCheckState] = useState<NicknameCheckStateOptions>('default');
 
   const [errorMessages, setErrorMessages] = useState<errorMessageType>({
@@ -159,7 +162,6 @@ export default function SignUp3Page() {
   /* Prev/Next 버튼 동작에 따른 페이지(회원가입 단계) 이동 */
   const navigate = useNavigate();
 
-  /*
   //넘겨받은 데이터가 없는 경우 올바른 경로가 아니므로 main으로 돌려보낸다.
   useEffect(() => {
     if (!sessionStorage.getItem('name')) navigate('/');
@@ -167,7 +169,7 @@ export default function SignUp3Page() {
       sessionStorage.removeItem('password'); //비밀번호는 삭제
       if (nickname !== '') setnicknameState('filled');
     }
-  }, []);*/
+  }, []);
 
   /* 모든 state가 빈 문자열이 아니면 선택이 완료된 것이므로 complete를 true로 전환한다. 반대도 마찬가지. */
   useEffect(() => {
@@ -215,12 +217,13 @@ export default function SignUp3Page() {
   }, [password, passwordState, password2, password2State]);
 
   //nicknameState가 바뀔 때, 즉 창을 클릭할 때에 대한 대처이다.
+  // 닉네임 제한 10->7자 수정
   useEffect(() => {
-    if ((nickname.length === 1 || nickname.length > 10) && nicknameState !== 'focused') {
+    if ((nickname.length === 1 || nickname.length > 7) && nicknameState !== 'focused') {
       setnicknameState('error');
       setErrorMessages({
         ...errorMessages,
-        nicknameErrorMessage: '닉네임은 2자 이상 10자 이하여야 해요.',
+        nicknameErrorMessage: '닉네임은 2자 이상 7자 이하여야 해요.',
       });
     } else if (nicknameCheck === 'error' && nicknameState !== 'focused') {
       setnicknameState('error');

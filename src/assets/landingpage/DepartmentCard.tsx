@@ -4,7 +4,7 @@ import Typography from '../Typography';
 export interface CardsProps extends React.ComponentPropsWithRef<'div'> {
   name: string;
   eng: string;
-  경쟁률: number;
+  합격자수: number;
   선발인원: number;
   min: number;
   mean: number;
@@ -12,7 +12,7 @@ export interface CardsProps extends React.ComponentPropsWithRef<'div'> {
   imagesrc: string;
 }
 
-const DepartmentCard = ({ name, eng, 경쟁률, 선발인원, min, mean, semester, imagesrc }: CardsProps) => {
+const DepartmentCard = ({ name, eng, 합격자수, 선발인원, min, mean, semester, imagesrc }: CardsProps) => {
   return (
     <CardContainer src={imagesrc}>
       <div style={{ display: 'flex' }}>
@@ -23,7 +23,7 @@ const DepartmentCard = ({ name, eng, 경쟁률, 선발인원, min, mean, semeste
         </SubjectWrapper>
       </div>
       <Typography style={{ fontWeight: '600', marginBottom: '34px' }}>20{semester}R 모집정보</Typography>
-      <div style={{ display: 'flex', gap: '85px' }}>
+      <div style={{ display: 'flex', gap: '70px' }}>
         <ContentWrapper>
           <Typography size="mediumText" color="rgba(20, 20, 20, 0.60)">
             {semester} 선발 인원
@@ -34,14 +34,14 @@ const DepartmentCard = ({ name, eng, 경쟁률, 선발인원, min, mean, semeste
         </ContentWrapper>
         <ContentWrapper>
           <Typography size="mediumText" color="rgba(20, 20, 20, 0.60)">
-            경쟁률
+            합격자 수
           </Typography>
           <Typography size="largeText" style={{ fontWeight: '600' }}>
-            {경쟁률} : 1
+            {합격자수}명
           </Typography>
         </ContentWrapper>
       </div>
-      <div style={{ display: 'flex', gap: '85px' }}>
+      <div style={{ display: 'flex', gap: '70px' }}>
         <ContentWrapper>
           <Typography size="mediumText" color="rgba(20, 20, 20, 0.60)">
             합격자 평균 학점
@@ -68,7 +68,8 @@ const CardContainer = styled.div<{ src?: string }>`
   width: 348px;
   height: 412px;
   border-radius: 10px;
-  padding-left: 46px;
+  padding-left: 36px;
+  padding-right: 30px;
   padding-top: 82px;
   box-shadow: 0px 0px 20px 0px rgba(20, 20, 20, 0.25);
 

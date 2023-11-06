@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
+import axios from 'axios';
 import SegmentedPicker from '../assets/SegmentedPicker';
 import GpaLineChart, { Data, LineData } from '../assets/GpaLineChart';
-import axios from 'axios';
+import { recruit } from '../common/recruiting';
+import { DBkeywords } from '../common/keyword';
+import client from '../utils/httpClient';
 
 type MajorOptions =
   | 'business'
@@ -18,7 +21,7 @@ type MajorOptions =
   | 'computer';
 
 const majorNameMapping = {
-  business: ['경영대학', 'Business School'],
+  business: ['경영학과', 'Business School'],
   economics: ['경제학과', 'Department of Economics'],
   psychology: ['심리학부', 'School of Psychology'],
   statistics: ['통계학과', 'Department of Statistics'],
@@ -122,9 +125,9 @@ const ArchiveDetailPage = () => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [enoughData, setEnoughData] = useState<boolean>(false);
 
-  const [numOfSelection, setNumOfSelection] = useState<number>(0); // FIXME: 모집요강에서?
+  const [numOfSelection, setNumOfSelection] = useState<number>(0);
   const [numOfApplication, setNumOfApplication] = useState<number>(0);
-  const [competitionRate, setCompetitionRate] = useState<number>(0); // FIXME: numOfSelection / numOfApplication
+  const [numOfPassed, setNumOfPassed] = useState<number>(0);
 
   const [lineData, setLineData] = useState<LineData>(tmpRandomData);
   const [meanGpa, setMeanGpa] = useState<Data>(tmpMeanGpa);
@@ -132,17 +135,7 @@ const ArchiveDetailPage = () => {
   const [modeGpa, setModeGpa] = useState<Data>(tmpModeGpa);
   const [minGpa, setMinGpa] = useState<Data>(tmpMinGpa);
 
-  let initKeywords: string[] = [
-    '리더쉽',
-    '목표달성',
-    '소통',
-    '비즈니스의 이해',
-    '도전과 극복',
-    '비전',
-    '자기개발',
-    '팀 내 소통',
-  ];
-  const [keywords, setKeywords] = useState<string[]>(initKeywords);
+  const [keywords, setKeywords] = useState<string[]>(DBkeywords[majorKoreanName] || []);
 
   const [cookies] = useCookies(['accessToken']);
   const accessToken = cookies.accessToken;
@@ -158,12 +151,21 @@ const ArchiveDetailPage = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const APIresponse = await axios.get(`http://localhost:8080/pastData/${majorName}/all`, config);
+        // const APIresponse = await axios.get(`http://localhost:8080/pastData/${majorName}/all`, config);
+        const APIresponse = await client.get(`/pastData/${majorName}/all`);
         const data = APIresponse.data.pastData;
 
         if (data.passedData.passedGPACountArray.length > 0) {
+          const selectionNum = recruit[majorKoreanName][semesterForAPI[activeIdx]] || 0;
+          // let competitionRate = 0;
+          // if (selectionNum > 0) {
+          //   competitionRate = data.overallData.numberOfData / selectionNum;
+          // }
+
           setEnoughData(true);
           setNumOfApplication(data.overallData.numberOfData);
+          setNumOfSelection(selectionNum);
+          setNumOfPassed(data.passedData.passedNumberOfData);
           setLineData(data.passedData.passedGPACountArray);
           setMeanGpa(data.passedData.passedMeanGPAData);
           setMedianGpa(data.passedData.passedMedianGPAData);
@@ -185,15 +187,27 @@ const ArchiveDetailPage = () => {
 
     try {
       const semester = semesterForAPI[idx];
-      const APIresponse = await axios.get(`http://localhost:8080/pastData/${majorName}/${semester}`, config);
+      // const APIresponse = await axios.get(`http://localhost:8080/pastData/${majorName}/${semester}`, config);
+      const APIresponse = await client.get(`/pastData/${majorName}/${semester}`);
       const data = APIresponse.data.pastData;
 
+      const selectionNum = recruit[majorKoreanName][semesterForAPI[idx]] || 0;
+      // let competitionRate = 0;
+      // if (selectionNum > 0) {
+      //   competitionRate = data.overallData.numberOfData / selectionNum;
+      // }
+
+      setEnoughData(true);
       setNumOfApplication(data.overallData.numberOfData);
+      setNumOfSelection(selectionNum);
+      setNumOfPassed(data.passedData.passedNumberOfData);
       setLineData(data.passedData.passedGPACountArray);
       setMeanGpa(data.passedData.passedMeanGPAData);
       setMedianGpa(data.passedData.passedMedianGPAData);
       setModeGpa(data.passedData.passedModeGPAData);
       setMinGpa(data.passedData.passedMinimumGPAData);
+
+      console.log(data.passedData.passedMedianGPAData);
 
       if (data.passedData.passedGPACountArray.length > 0) {
         setEnoughData(true);
@@ -266,27 +280,33 @@ const ArchiveDetailPage = () => {
         </SelectionInfoDescriptionBox>
         <SelectionInfoContentsWrapper>
           <SelectionInfoContent>
-            <Text>선발인원</Text>
-            <SelectionInfoValue>{numOfSelection}명</SelectionInfoValue>
+            <Text>{activeIdx === 0 ? '평균 선발인원' : '선발인원'}</Text>
+            <SelectionInfoValue>
+              {numOfSelection === 0
+                ? '집계불가'
+                : activeIdx === 0
+                ? `${Math.floor(numOfSelection / 6)} 명`
+                : `${numOfSelection} 명`}
+            </SelectionInfoValue>
           </SelectionInfoContent>
           <svg xmlns="http://www.w3.org/2000/svg" width="2" height="72" fill="none">
             <path stroke="#DFDFDF" stroke-linecap="round" d="M1 1v72" />
           </svg>
           <SelectionInfoContent>
-            <Text>지원자 수</Text>
+            <Text>모의 지원자 수</Text>
             <SelectionInfoValue>{numOfApplication}명</SelectionInfoValue>
           </SelectionInfoContent>
           <svg xmlns="http://www.w3.org/2000/svg" width="2" height="72" fill="none">
             <path stroke="#DFDFDF" stroke-linecap="round" d="M1 1v72" />
           </svg>
           <SelectionInfoContent>
-            <Text>경쟁률</Text>
-            <SelectionInfoValue>{competitionRate}:1</SelectionInfoValue>
+            <Text>모의 지원 합격자 수</Text>
+            <SelectionInfoValue>{enoughData ? numOfPassed : 0}명</SelectionInfoValue>
           </SelectionInfoContent>
         </SelectionInfoContentsWrapper>
       </SelectionInfoWrapper>
       <Container>
-        <PasserGPAInfoWrapper>
+        <PasserGPAInfoWrapper keywordsLength={keywords.length}>
           <PasserGPAInfoDescriptionWrapper>
             <PasserGpaChartDescriptionBox>
               <DescriptionIcon src="../../design_image/previous_detail/fi_bar-chart.png" />
@@ -352,21 +372,23 @@ const ArchiveDetailPage = () => {
             </PasserGPAInfoAnalyticsWrapper>
           </PasserGPAInfoDetailsWrapper>
         </PasserGPAInfoWrapper>
-        <KeywordWrapper>
-          <KeywordDescriptionBox>
-            <DescriptionIcon src="../../design_image/previous_detail/fi_edit-2.png" />
-            <Description>자기소개서 합격 키워드</Description>
-          </KeywordDescriptionBox>
-          <KeywordContainer>
-            {keywords.map((keyword, index) => (
-              <KeywordBox key={index}>
-                <Text>{keyword}</Text>
-              </KeywordBox>
-            ))}
-          </KeywordContainer>
-        </KeywordWrapper>
+        {keywords.length !== 0 && (
+          <KeywordWrapper>
+            <KeywordDescriptionBox>
+              <DescriptionIcon src="../../design_image/previous_detail/fi_edit-2.png" />
+              <Description>자기소개서 합격 키워드</Description>
+            </KeywordDescriptionBox>
+            <KeywordContainer>
+              {keywords.map((keyword, index) => (
+                <KeywordBox key={index}>
+                  <Text>{keyword}</Text>
+                </KeywordBox>
+              ))}
+            </KeywordContainer>
+          </KeywordWrapper>
+        )}
         {!enoughData && (
-          <CollectingWrapper>
+          <CollectingWrapper keywordsLength={keywords.length}>
             <CollectingTitleText>쿠플라이에서 아직 정보를 수집 중입니다!</CollectingTitleText>
             <CollectingDetailText>
               더 정확한 정보를 제공하기 위해서 쿠플라이에서 정보를 수집 중입니다.
@@ -388,27 +410,41 @@ const Wrapper = styled.div`
   width: 100vw;
   max-width: 1920px;
 
-  &::before,
+  &::before {
+    content: '';
+    position: absolute;
+    width: 1000px;
+    height: 1000px;
+    border-radius: 1000px;
+    filter: blur(75px);
+    opacity: 0.4;
+    background: radial-gradient(
+      51.7% 51.7% at 58.12% 41.5%,
+      rgba(216, 88, 136, 0.3) 0%,
+      rgba(255, 175, 189, 0.18) 100%
+    );
+    filter: blur(75px);
+    z-index: -2;
+    top: -100px;
+    left: -200px;
+  }
+
   &::after {
     content: '';
     position: absolute;
-    width: 90%;
-    height: 90%;
-    border-radius: 782px;
-    filter: blur(150px);
-    opacity: 0.7;
-    background: radial-gradient(50% 50% at 50% 50%, rgba(232, 88, 136, 0.15) 0%, rgba(255, 175, 189, 0.05) 100%);
+    width: 1000px;
+    height: 1000px;
+    border-radius: 1000px;
+    filter: blur(75px);
+    opacity: 0.5;
+    background: radial-gradient(
+      67.64% 67.64% at 116.69% 26.92%,
+      rgba(216, 88, 136, 0.5) 0%,
+      rgba(255, 175, 189, 0.05) 100%
+    );
     z-index: -2;
-  }
-
-  &::before {
-    top: -5%;
-    left: -30%;
-  }
-
-  &::after {
-    bottom: -60%;
-    right: -40%;
+    top: 400px;
+    right: 150px;
   }
 `;
 
@@ -605,7 +641,7 @@ const SelectionInfoWrapper = styled.div`
 `;
 
 const SelectionInfoContentsWrapper = styled.div`
-  gap: 114px;
+  gap: 96px;
   display: flex;
 `;
 
@@ -624,7 +660,7 @@ const SelectionInfoValue = styled.text`
   text-align: center;
 `;
 
-const PasserGPAInfoWrapper = styled.div`
+const PasserGPAInfoWrapper = styled.div<{ keywordsLength: number }>`
   height: 555px;
   width: 100vw;
   max-width: 1665px;
@@ -634,6 +670,7 @@ const PasserGPAInfoWrapper = styled.div`
   border-radius: 5px;
   box-shadow: 0px 4px 200px #1414140d;
   margin-top: 18px;
+  margin-bottom: ${(props) => (props.keywordsLength === 0 ? '104px' : '18px')};
   position: relative;
   z-index: 1;
 `;
@@ -711,7 +748,6 @@ const KeywordWrapper = styled.div`
   border-color: #ffffff;
   border-radius: 5px;
   box-shadow: 0px 4px 200px #1414140d;
-  margin-top: 18px;
   margin-bottom: 104px;
   position: relative;
   z-index: 1;
@@ -753,12 +789,12 @@ const Container = styled.div`
   justify-content: flex-start;
 `;
 
-const CollectingWrapper = styled.div`
+const CollectingWrapper = styled.div<{ keywordsLength: number }>`
   background-color: #f7f7f773;
   border-radius: 5px;
   box-shadow: 0px 0px 28px #1414140d;
   backdrop-filter: blur(10px);
-  height: 699px;
+  height: ${(props) => (props.keywordsLength === 0 ? '555px' : '699px')};
   width: 100vw;
   max-width: 1665px;
   margin-top: 18px;

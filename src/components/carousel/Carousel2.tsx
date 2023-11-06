@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   width: 100vw;
-  max-width: 2560px;
+  // max-width: 2560px;
   // max-width: 1920px;
   height: 100%; //630px;
   display: flex;
@@ -24,11 +24,10 @@ const ContentWrapper = styled.div`
   margin-right: 200px;
 `;
 
-const DirectButton = styled.button`
+const DirectButton = styled.div`
   width: 147px;
   height: 44px;
   display: inline-flex;
-  padding: 12px 24px;
   justify-content: center;
   align-items: center;
   gap: 8px;
@@ -41,10 +40,10 @@ const DirectButton = styled.button`
 const ButtonText = styled.text`
   color: #d85888;
   text-align: center;
-  font-family: GmarketSans;
+  font-family: Pretendard;
   font-size: 20px;
   font-style: normal;
-  font-weight: 300;
+  font-weight: 500;
   line-height: 20px; /* 100% */
   letter-spacing: -0.6px;
 `;

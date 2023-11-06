@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 import React, { useState, useEffect } from 'react';
+import { useCookies } from 'react-cookie';
+import axios from 'axios';
 import TextFieldBox, { StateOptions } from '../../../assets/TextFieldBox';
 import PrevButton from '../../../assets/buttons/PrevButton';
 import NextButton from '../../../assets/buttons/NextButton';
@@ -14,11 +16,21 @@ import LabelButton from '../../../assets/buttons/LabelButton';
 import MockApplicationButton from '../../../assets/myboardpage/MockApplication';
 import AlertIconCheck from '../../../assets/icons/AlertIconCheck';
 import FirstReAppliedButton from '../../../assets/myboardpage/FirstReAppliedButton';
+// import UploadButton from '../../../assets/myboardpage/UploadButton';
+import CompleteMockApplicationButton from '../../../assets/myboardpage/CompleteMockApplication';
+import { TypeFlags } from 'typescript';
+import client from '../../../utils/httpClient';
 
 export interface ModalProps {
   isOpenModal: boolean;
   setOpenModal: (isOpenModal: boolean) => void;
   onClickModal: () => void; // 함수;
+}
+
+/* 파일 업로드 */
+export interface UploadButtonProps extends React.ComponentPropsWithoutRef<'button'> {
+  isClicked: boolean;
+  children?: React.ReactNode;
 }
 
 /*
@@ -31,10 +43,140 @@ export interface ModalProps {
   */
 
 export default function ApplicationModal(props: ModalProps) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  function UploadButton(props: UploadButtonProps) {
+    const { children = '첨부 파일 업로드', ...rest } = props;
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newFiles = e.target.files;
+      if (newFiles && newFiles.length > 0) {
+        const newFile = newFiles[0];
+        setSelectedFile(newFile);
+      }
+    };
+
+    return (
+      <div style={{ position: 'relative' }}>
+        {selectedFile! ? (
+          <div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="70"
+              height="70"
+              viewBox="0 0 70 70"
+              fill="none"
+              style={{ display: 'flex', justifyContent: 'center', marginTop: '63px', marginLeft: '279px' }}
+            >
+              <path
+                d="M40.8346 5.83398H17.5013C15.9542 5.83398 14.4705 6.44857 13.3765 7.54253C12.2826 8.63649 11.668 10.1202 11.668 11.6673V58.334C11.668 59.8811 12.2826 61.3648 13.3765 62.4588C14.4705 63.5527 15.9542 64.1673 17.5013 64.1673H52.5013C54.0484 64.1673 55.5321 63.5527 56.6261 62.4588C57.7201 61.3648 58.3346 59.8811 58.3346 58.334V23.334L40.8346 5.83398Z"
+                stroke="#E57C90"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path d="M35 52.5V35" stroke="#E57C90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path
+                d="M26.25 43.75H43.75"
+                stroke="#E57C90"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M40.832 5.83398V23.334H58.332"
+                stroke="#E57C90"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <Typography
+              size="mediumText"
+              style={{
+                display: 'flex',
+                color: '#E57C90',
+                marginTop: '5px',
+                textAlign: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {selectedFile.name}
+            </Typography>
+          </div>
+        ) : (
+          <div style={{ position: 'relative' }}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="92"
+              height="70"
+              viewBox="0 0 92 70"
+              fill="none"
+              style={{ display: 'flex', justifyContent: 'center', marginTop: '37px', marginLeft: '268px' }}
+            >
+              <path
+                d="M61.3698 49L46.0365 35L30.7031 49"
+                stroke="#E57C90"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M46.0391 35V66.5"
+                stroke="#E57C90"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M78.2 57.3649C87.4767 52.7449 90.9267 42.1049 85.8667 33.6349C82.4934 27.9999 76.0534 24.4999 69.0384 24.4999H64.2084C59.9534 9.51995 43.24 0.524947 26.8334 4.40995C10.4267 8.29495 0.575035 23.5549 4.83004 38.4999C6.0567 42.7699 8.3567 46.7249 11.5384 50.0499"
+                stroke="#E57C90"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M61.3698 49L46.0365 35L30.7031 49"
+                stroke="#E57C90"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+
+            <Typography
+              size="mediumText"
+              style={{
+                display: 'flex',
+                color: '#E57C90',
+                marginTop: '17px',
+                textAlign: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              학업계획서를 첨부해주세요 (선택)
+            </Typography>
+            <input
+              type="file"
+              id="fileInput"
+              onChange={handleFileChange}
+              style={{
+                position: 'absolute',
+                top: '130px',
+                left: '231px',
+              }}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
   const { isOpenModal, setOpenModal, onClickModal } = props;
   const [currentModal, setCurrentModal] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-  const [nextButton, setNextButton] = useState<boolean>(false);
+  const [nextButton1, setNextButton1] = useState<boolean>(false);
+  const [nextButton2, setNextButton2] = useState<boolean>(false);
 
   const [candidateState, setCandidateState] = useState<'default' | 'clicked' | 'unactive'>('default');
   const [passerState, setPasserState] = useState<'default' | 'clicked' | 'unactive'>('default');
@@ -61,42 +203,87 @@ export default function ApplicationModal(props: ModalProps) {
     }
   };
 
-  const [GPA1, setGPA1] = useState<string>(sessionStorage.getItem('GPA')?.charAt(0) || '');
-  const [GPA2, setGPA2] = useState<string>(sessionStorage.getItem('GPA')?.charAt(2) || '');
-  const [GPA3, setGPA3] = useState<string>(sessionStorage.getItem('GPA')?.charAt(3) || '');
-  const [stdID, setStdID] = useState<string>(sessionStorage.getItem('studentId') || '');
-
+  const [GPA1, setGPA1] = useState<string>(localStorage.getItem('curGPA')?.charAt(0) || '');
+  const [GPA2, setGPA2] = useState<string>(localStorage.getItem('curGPA')?.charAt(2) || '');
+  const [GPA3, setGPA3] = useState<string>(localStorage.getItem('curGPA')?.charAt(3) || '');
+  const [stdID, setStdID] = useState<string>(localStorage.getItem('studentId') || '');
+  const [name, setName] = useState<string>(localStorage.getItem('name') || '');
+  const [hopeMajor1, setHopeMajor1] = useState<string>(localStorage.getItem('hopeMajor1') || '');
+  const [hopeMajor2, setHopeMajor2] = useState<string>(localStorage.getItem('hopeMajor2') || '');
   const [currentSemester1, setCurrentSemester1] = useState<string>(
-    sessionStorage.getItem('currentSemester')?.charAt(0) || '',
+    localStorage.getItem('currentSemester')?.charAt(0) || '',
   );
   const [currentSemester2, setCurrentSemester2] = useState<string>(
-    sessionStorage.getItem('currentSemester')?.charAt(2) || '',
+    localStorage.getItem('currentSemester')?.charAt(2) || '',
   );
 
-  const [stdIDState, setStdIDState] = useState<StateOptions>('default');
+  const [stdIDState, setStdIDState] = useState<StateOptions>('filled');
+  const [lastBoxRef, setLastBoxRef] = useState<any>(null);
 
   useEffect(() => {
     const isValidGPA = GPA1 !== '' && GPA2 !== '' && GPA3 !== '';
     const isValidStdID = stdID.length === 10;
 
     if (isValidGPA && isValidStdID) {
-      setNextButton(true);
+      setNextButton1(true);
     } else {
-      setNextButton(false);
+      setNextButton1(false);
     }
   }, [GPA1, GPA2, GPA3, stdID]);
 
   useEffect(() => {
-    if (!!currentSemester1 && !!currentSemester2) {
-      setNextButton(true);
-    } else {
-      setNextButton(false);
+    if (parseFloat(`${GPA1}.${GPA2}${GPA3}`) > 4.5) {
+      setGPA1('4');
+      setGPA2('5');
+      setGPA3('0');
+      if (lastBoxRef && lastBoxRef.current) lastBoxRef.current.focus();
     }
-  }, [currentSemester1, currentSemester2]);
+  }, [GPA1, GPA2, GPA3]);
+
+  useEffect(() => {
+    if (
+      !!currentSemester1 &&
+      +currentSemester1 > 1 &&
+      !!currentSemester2 &&
+      (candidateState === 'clicked' || passerState === 'clicked')
+    ) {
+      setNextButton2(true);
+    } else {
+      setNextButton2(false);
+    }
+  }, [currentSemester1, currentSemester2, candidateState, passerState]);
+
+  const submitApplication = async () => {
+    try {
+      const applyData = {
+        applyMajor1: hopeMajor1,
+        applyMajor2: hopeMajor2,
+        applyGPA: parseFloat(GPA1 + '.' + GPA2 + GPA3),
+        applyTimes: candidateState === 'clicked' ? 'First' : 'Reapply',
+        applyGrade: currentSemester1 + '-' + currentSemester2,
+      };
+      await client.post('/dashboard', applyData);
+
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append('document', selectedFile);
+
+        await client.post('/user/resume', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // ---------------------------------------------------------------------------------------------------
 
   return (
     <Main>
-      {isOpenModal && // 모달 오픈
+      {isOpenModal &&
         (isSubmitted ? ( // 프로그래스바가 있는 창과 없는 창 구분 (모달번호 0, 1, 2,  vs. 3, 4)
           <ModalLarge onClickToggleModal={onClickModal}>
             <CloseButton
@@ -114,13 +301,13 @@ export default function ApplicationModal(props: ModalProps) {
               </svg>
             </CloseButton>
             {currentModal === 3 ? ( // 모달 3 vs. 모달 4
-              <AlertWrapper>
+              <AlertWrapper style={{ marginTop: '180px' }}>
                 <AlertIconExclamation width="113px" height="113px" />
                 <Typography size="largeText" bold="700" style={{ marginTop: '25px' }}>
                   모의지원을 완료 하시겠습니까?
                 </Typography>
                 <Typography size="mediumText" bold="500" style={{ marginTop: '10px', lineHeight: '136.111%' }}>
-                  모의지원을 완료한 후에는 철회가 불가능합니다.
+                  지원을 완료한 후에는 철회 및 (남은 모의지원 기간 동안) 개인정보 수정이 불가능합니다.
                 </Typography>
                 <div
                   style={{
@@ -130,12 +317,20 @@ export default function ApplicationModal(props: ModalProps) {
                     marginTop: '50px',
                   }}
                 >
-                  <LabelButton buttonType="secondary" size="medium" style={{ width: '627.232px', height: '68px' }}>
+                  <LabelButton
+                    buttonType="secondary"
+                    size="medium"
+                    style={{ width: '627.232px', height: '68px' }}
+                    onClick={() => {
+                      setOpenModal(false);
+                    }}
+                  >
                     취소하기
                   </LabelButton>
                   <MockApplicationButton
                     onClick={() => {
                       setCurrentModal(4); // 다음 창으로 이동
+                      submitApplication();
                     }}
                     style={{ width: '627.232px', height: '68px', fontSize: '20px' }}
                     // 글자 디자인 수정 필요
@@ -145,17 +340,18 @@ export default function ApplicationModal(props: ModalProps) {
                 </div>
               </AlertWrapper>
             ) : (
-              <AlertWrapper>
+              <AlertWrapper style={{ marginTop: '180px' }}>
                 <AlertIconCheck width="113px" height="113px" />
                 <Typography size="largeText" bold="700" style={{ marginTop: '25px' }}>
                   모의지원이 완료되었습니다.
                 </Typography>
                 <Typography size="mediumText" bold="500" style={{ marginTop: '10px', lineHeight: '136.111%' }}>
-                  고대빵 님의 이중전공 합격을 기원합니다.
+                  {name} 님의 이중전공 합격을 기원합니다.
                 </Typography>
                 <SubmitButton
                   onClick={() => {
                     setOpenModal(!isOpenModal);
+                    window.location.reload();
                   }}
                   style={{ marginTop: '107px' }}
                 >
@@ -181,231 +377,235 @@ export default function ApplicationModal(props: ModalProps) {
               </svg>
             </CloseButton>
             <ModalTiteWrapper>
-              <Typography size="largeText">실지원 정보 확인하기</Typography>
-              <Typography size="mediumText" style={{ lineHeight: ' 136.111% ' }}>
-                실제 이중전공 지원 시 입력한 정보와 달라진 정보를 수정해주세요.
+              <Typography size="largeText" style={{ position: 'absolute', top: '55px', left: '308px' }}>
+                지원 정보 확인하기
+              </Typography>
+              <Typography
+                size="mediumText"
+                style={{
+                  textAlign: 'center',
+                  marginTop: '10px',
+                  color: 'rgba(20, 20, 20, 0.80)',
+                  lineHeight: ' 136.111% ',
+                }}
+              >
+                실제 이중전공 지원과 동일한 정보를 입력해주세요.
               </Typography>
             </ModalTiteWrapper>
             {currentModal === 0 && ( // 기존 정보 확인하기 단계
-              <div>
-                <ProgressBarWrapper>
+              <>
+                <ProgressBarWrapper style={{ position: 'absolute', top: '120px', left: '-82.5px' }}>
                   <MultiStepProgressBar numberOfSteps={3} currentStep={1} complete={true} />
-                  <ProgressBarTtitle style={{ paddingLeft: '135px' }}>
+                  <ProgressBarTtitle>
                     <Typography
                       size="mediumText"
-                      style={{ color: '#E57C90', lineHeight: '136.111%', textAlign: 'left' }}
+                      style={{ color: '#E57C90', textAlign: 'left', paddingLeft: '135px', lineHeight: '136.111%' }}
                     >
                       STEP1
                       <br />
                       기존 정보 확인하기
                     </Typography>
-                  </ProgressBarTtitle>
-                  <ProgressBarTtitle>
                     <Typography
                       size="mediumText"
                       style={{
-                        position: 'absolute',
                         color: 'var(--DF_Grey-2, #DFDFDF)',
-                        lineHeight: '136.111%',
-                        top: '185px',
-                        left: '377px',
                         textAlign: 'center',
+                        marginTop: '-49px',
+                        lineHeight: '136.111%',
                       }}
                     >
                       STEP2
                     </Typography>
-                  </ProgressBarTtitle>
-                  <ProgressBarTtitle>
                     <Typography
                       size="mediumText"
                       style={{
-                        position: 'absolute',
                         color: 'var(--DF_Grey-2, #DFDFDF)',
-                        lineHeight: '136.111%',
-                        top: '185px',
-                        left: '705px',
                         textAlign: 'right',
+                        marginTop: '-23px',
+                        marginRight: '130px',
+                        lineHeight: '136.111%',
                       }}
                     >
                       STEP3
                     </Typography>
                   </ProgressBarTtitle>
                 </ProgressBarWrapper>
-                <div style={{ position: 'absolute', top: 0, left: -1 }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="814" height="232" viewBox="0 0 814 232" fill="none">
-                    <path
-                      d="M0.5 20C0.5 9.23045 9.23045 0.5 20 0.5H794C804.77 0.5 813.5 9.23045 813.5 20V231.5H0.5V20Z"
-                      stroke="#DFDFDF"
-                    />
-                  </svg>
-                </div>
-                <div style={{ display: 'flex' }}>
-                  <Typography size="mediumText" bold="700" style={{ opacity: '0.8' }}>
-                    학점
-                  </Typography>
-                  <Typography size="mediumText">을 입력해주세요.</Typography>
-                </div>
-                <VerifiBoxWrapper>
-                  <VerificationBox name="gpa-1" value={GPA1} setValue={setGPA1} />
-                  <div style={{ marginTop: 60 }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="2" height="2" viewBox="0 0 2 2" fill="none">
-                      <circle cx="1" cy="1" r="1" fill="#141414" />
-                    </svg>
+                <DividingLine />
+                <ContentsWrapper>
+                  <div style={{ position: 'absolute', top: '268px', left: '93px' }}>
+                    <div style={{ display: 'flex', marginBottom: '10px' }}>
+                      <Typography size="mediumText" bold="700" style={{ opacity: '0.8' }}>
+                        학점
+                      </Typography>
+                      <Typography size="mediumText">을 입력해주세요.</Typography>
+                    </div>
+                    <VerifiBoxWrapper>
+                      <VerificationBox name="gpa-1" value={GPA1} setValue={setGPA1} isEntered={GPA1 !== ''} />
+                      <div style={{ marginTop: 60 }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="2" height="2" viewBox="0 0 2 2" fill="none">
+                          <circle cx="1" cy="1" r="1" fill="#141414" />
+                        </svg>
+                      </div>
+                      <VerificationBox name="gpa-2" value={GPA2} setValue={setGPA2} isEntered={GPA2 !== ''} />
+                      <VerificationBox
+                        name="gpa-3"
+                        value={GPA3}
+                        setValue={setGPA3}
+                        isEntered={GPA3 !== ''}
+                        setRef={setLastBoxRef}
+                      />
+                    </VerifiBoxWrapper>
                   </div>
-                  <VerificationBox name="gpa-2" value={GPA2} setValue={setGPA2} />
-                  <VerificationBox name="gpa-3" value={GPA3} setValue={setGPA3} />
-                </VerifiBoxWrapper>
-                <div style={{ display: 'flex' }}>
-                  <Typography size="mediumText" bold="700" style={{ opacity: '0.8' }}>
-                    고려대학교 학번
-                  </Typography>
-                  <Typography size="mediumText">을 입력해주세요.</Typography>
-                </div>
-                <TextFieldBox
-                  placeholder="학번 10자리"
-                  value={stdID}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setStdID(e.target.value);
-                  }}
-                  state={stdIDState}
-                  setState={setStdIDState}
-                  setValue={setStdID}
-                  helpMessage="학번 10자리"
-                  errorMessage="학번이 10자리 숫자가 아닙니다."
-                ></TextFieldBox>
-                <ButtonsWrapper>
-                  <PrevButton active={false} onClick={handlePrev} />
-                  <NextButton active={nextButton} onClick={handleNext} />
-                </ButtonsWrapper>
-              </div>
+                  <div style={{ position: 'absolute', top: '412px', left: '93px' }}>
+                    <div style={{ display: 'flex', marginBottom: '10px' }}>
+                      <Typography size="mediumText" bold="700" style={{ opacity: '0.8' }}>
+                        고려대학교 학번
+                      </Typography>
+                      <Typography size="mediumText">을 입력해주세요.</Typography>
+                    </div>
+                    <TextFieldBox
+                      placeholder="학번 10자리"
+                      value={stdID}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setStdID(e.target.value);
+                      }}
+                      state={stdIDState}
+                      setState={setStdIDState}
+                      setValue={setStdID}
+                      helpMessage="학번 10자리"
+                      errorMessage="학번이 10자리 숫자가 아닙니다."
+                    ></TextFieldBox>
+                  </div>
+                  <ButtonsWrapper style={{ position: 'absolute', left: '93px', top: '500px' }}>
+                    <PrevButton active={false} onClick={handlePrev} />
+                    <NextButton active={nextButton1} onClick={handleNext} />
+                  </ButtonsWrapper>
+                </ContentsWrapper>
+              </>
             )}
             {currentModal === 1 && ( // 지원학기 입력하기 단계
-              <div>
-                <ProgressBarWrapper>
+              <>
+                <ProgressBarWrapper style={{ position: 'absolute', top: '136px', left: '-82.5px' }}>
                   <MultiStepProgressBar numberOfSteps={3} currentStep={2} complete={true} />
-                  <ProgressBarTtitle style={{ paddingLeft: '135px' }}>
-                    <Typography
-                      size="mediumText"
-                      style={{ color: 'var(--DF_Grey-2, #DFDFDF)', lineHeight: '136.111%', textAlign: 'left' }}
-                    >
-                      STEP1
-                    </Typography>
-                  </ProgressBarTtitle>
                   <ProgressBarTtitle>
                     <Typography
                       size="mediumText"
+                      style={{ color: '#E57C90', textAlign: 'left', paddingLeft: '135px', lineHeight: '136.111%' }}
+                    >
+                      STEP1
+                    </Typography>
+                    <Typography
+                      size="mediumText"
                       style={{
-                        position: 'absolute',
                         color: '#E57C90',
-                        lineHeight: '136.111%',
-                        top: '185px',
-                        left: '338px',
                         textAlign: 'center',
+                        marginTop: '-23px',
+                        lineHeight: '136.111%',
                       }}
                     >
                       STEP2
                       <br />
                       지원학기 입력하기
                     </Typography>
-                  </ProgressBarTtitle>
-                  <ProgressBarTtitle>
                     <Typography
                       size="mediumText"
                       style={{
-                        position: 'absolute',
                         color: 'var(--DF_Grey-2, #DFDFDF)',
-                        lineHeight: '136.111%',
-                        top: '185px',
-                        left: '705px',
                         textAlign: 'right',
+                        marginTop: '-49px',
+                        marginRight: '130px',
+                        lineHeight: '136.111%',
                       }}
                     >
                       STEP3
                     </Typography>
                   </ProgressBarTtitle>
                 </ProgressBarWrapper>
-                <div style={{ position: 'absolute', top: 0, left: 0 }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="814" height="232" viewBox="0 0 814 232" fill="none">
-                    <path
-                      d="M0.5 20C0.5 9.23045 9.23045 0.5 20 0.5H794C804.77 0.5 813.5 9.23045 813.5 20V231.5H0.5V20Z"
-                      stroke="#DFDFDF"
-                    />
-                  </svg>
-                </div>
-                <div style={{ display: 'flex' }}>
-                  <Typography size="mediumText" bold="700" style={{ opacity: '0.8' }}>
-                    재학 중인 학년/학기
-                  </Typography>
-                  <Typography size="mediumText">를 입력해주세요.</Typography>
-                </div>
-                <VerifiBoxWrapper>
-                  <VerificationBox name="currentSemester-1" value={currentSemester2} setValue={setCurrentSemester1} />
-                  <div style={{ marginTop: 60 }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="2" viewBox="0 0 14 2" fill="none">
-                      <path d="M0 1H14" stroke="#B9B9B9" />
-                    </svg>
+                <DividingLine />
+                <ContentsWrapper>
+                  <div style={{ position: 'absolute', top: '268px', left: '93px' }}>
+                    <div style={{ display: 'flex', marginBottom: '10px' }}>
+                      <Typography size="mediumText" bold="700" style={{ opacity: '0.8' }}>
+                        재학 중인 학년/학기
+                      </Typography>
+                      <Typography size="mediumText">를 입력해주세요.</Typography>
+                    </div>
+                    <VerifiBoxWrapper>
+                      <VerificationBox
+                        name="currentSemester-1"
+                        value={currentSemester1}
+                        setValue={setCurrentSemester1}
+                      />
+                      <div style={{ marginTop: '30px' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="2" viewBox="0 0 14 2" fill="none">
+                          <path d="M0 1H14" stroke="#B9B9B9" />
+                        </svg>
+                      </div>
+                      <VerificationBox
+                        name="currentSemester-2"
+                        value={currentSemester2}
+                        setValue={setCurrentSemester2}
+                      />
+                    </VerifiBoxWrapper>
                   </div>
-                  <VerificationBox name="currentSemester-2" value={currentSemester2} setValue={setCurrentSemester2} />
-                </VerifiBoxWrapper>
-                <div style={{ display: 'flex' }}>
-                  <Typography size="mediumText" bold="700" style={{ opacity: '0.8' }}>
-                    과거 동일 학과를 지원
-                  </Typography>
-                  <Typography size="mediumText">했던 경험이 있나요?</Typography>
-                </div>
-                <FirstReAppliedButton
-                  state={candidateState}
-                  double={false}
-                  onClick={() => handleButtonClick('candidate')}
-                ></FirstReAppliedButton>
-                <FirstReAppliedButton
-                  state={passerState}
-                  double={true}
-                  onClick={() => handleButtonClick('passer')}
-                ></FirstReAppliedButton>
-                <ButtonsWrapper>
-                  <PrevButton active={true} onClick={handlePrev} />
-                  <NextButton active={nextButton} onClick={handleNext} />
-                </ButtonsWrapper>
-              </div>
+                  <div style={{ position: 'absolute', top: '412px', left: '93px' }}>
+                    <div style={{ display: 'flex', marginBottom: '10px' }}>
+                      <Typography size="mediumText" bold="700" style={{ opacity: '0.8' }}>
+                        과거 동일 학과를 지원
+                      </Typography>
+                      <Typography size="mediumText">했던 경험이 있나요?</Typography>
+                    </div>
+                    <div style={{ display: 'flex' }}>
+                      <FirstReAppliedButton
+                        state={candidateState}
+                        double={false}
+                        onClick={() => handleButtonClick('candidate')}
+                      ></FirstReAppliedButton>
+                      <FirstReAppliedButton
+                        style={{ marginLeft: '34px' }}
+                        state={passerState}
+                        double={true}
+                        onClick={() => handleButtonClick('passer')}
+                      ></FirstReAppliedButton>
+                    </div>
+                  </div>
+                  <ButtonsWrapper style={{ position: 'absolute', left: '93px', top: '500px' }}>
+                    <PrevButton active={true} onClick={handlePrev} />
+                    <NextButton active={nextButton2} onClick={handleNext} />
+                  </ButtonsWrapper>
+                </ContentsWrapper>
+              </>
             )}
             {currentModal === 2 && ( // 자기소개서 첨부하기 단계
-              <div>
-                <ProgressBarWrapper>
+              <>
+                <ProgressBarWrapper style={{ position: 'absolute', top: '136px', left: '-82.5px' }}>
                   <MultiStepProgressBar numberOfSteps={3} currentStep={3} complete={true} />
-                  <ProgressBarTtitle style={{ paddingLeft: '135px' }}>
-                    <Typography
-                      size="mediumText"
-                      style={{ color: 'var(--DF_Grey-2, #DFDFDF)', lineHeight: '136.111%', textAlign: 'left' }}
-                    >
-                      STEP1
-                    </Typography>
-                  </ProgressBarTtitle>
                   <ProgressBarTtitle>
                     <Typography
                       size="mediumText"
+                      style={{ color: '#E57C90', textAlign: 'left', paddingLeft: '135px', lineHeight: '136.111%' }}
+                    >
+                      STEP1
+                    </Typography>
+                    <Typography
+                      size="mediumText"
                       style={{
-                        position: 'absolute',
-                        color: 'var(--DF_Grey-2, #DFDFDF)',
-                        lineHeight: '136.111%',
-                        top: '185px',
-                        left: '377px',
+                        color: '#E57C90',
                         textAlign: 'center',
+                        marginTop: '-23px',
+                        lineHeight: '136.111%',
                       }}
                     >
                       STEP2
                     </Typography>
-                  </ProgressBarTtitle>
-                  <ProgressBarTtitle>
                     <Typography
                       size="mediumText"
                       style={{
-                        position: 'absolute',
                         color: '#E57C90',
-                        lineHeight: '136.111%',
-                        top: '185px',
-                        left: '615px',
                         textAlign: 'right',
+                        marginTop: '-25px',
+                        marginRight: '130px',
+                        lineHeight: '136.111%',
                       }}
                     >
                       STEP3
@@ -414,15 +614,45 @@ export default function ApplicationModal(props: ModalProps) {
                     </Typography>
                   </ProgressBarTtitle>
                 </ProgressBarWrapper>
-                <div style={{ position: 'absolute', top: 0, left: 0 }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="814" height="232" viewBox="0 0 814 232" fill="none">
-                    <path
-                      d="M0.5 20C0.5 9.23045 9.23045 0.5 20 0.5H794C804.77 0.5 813.5 9.23045 813.5 20V231.5H0.5V20Z"
-                      stroke="#DFDFDF"
-                    />
-                  </svg>
+                <DividingLine />
+                <ContentsWrapper>
+                  <SubContentsWrapper>
+                    <div style={{ position: 'absolute', left: '93px', top: '268px' }}>
+                      <Typography
+                        size="mediumText"
+                        style={{ color: 'var(--Main-Black, #141414)', opacity: 0.8, fontWeight: '700' }}
+                      >
+                        자기소개서 첨부하기
+                      </Typography>
+                      <Typography
+                        size="mediumText"
+                        style={{
+                          color: 'var(--A8_Grey-4, #A8A8A8)',
+                          opacity: 0.8,
+                          marginLeft: '150px',
+                          marginTop: '-18px',
+                        }}
+                      >
+                        (선택)
+                      </Typography>
+                    </div>
+                    <div style={{ position: 'absolute', left: '93px', top: '296px' }}>
+                      <UploadBox>
+                        <UploadButton isClicked={true} style={{ position: 'absolute', top: '165px', left: '231px' }} />
+                      </UploadBox>
+                    </div>
+                  </SubContentsWrapper>
+                </ContentsWrapper>
+                <div style={{ position: 'absolute', top: '640px', left: 0 }}>
+                  <CompleteMockApplicationButton
+                    active={true}
+                    onClick={() => {
+                      setCurrentModal(3);
+                      setIsSubmitted(true);
+                    }}
+                  />
                 </div>
-              </div>
+              </>
             )}
           </ModalLarge>
         ))}
@@ -437,7 +667,8 @@ const Main = styled.main`
   flex-direction: column;
   align-items: center;
   position: fixed;
-  z-index: 20; // Modal.tsx 와 상이한 stacking context
+  overflow-y: scroll;
+  z-index: 1005;
 `;
 
 const CloseButton = styled.button`
@@ -456,6 +687,7 @@ const AlertWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 628px;
+  height: 796px;
   align-items: center;
   text-align: center;
   margin: auto auto;
@@ -471,7 +703,6 @@ const ModalTiteWrapper = styled.div`
 `;
 
 const ProgressBarTtitle = styled.text`
-  color: #e57c90;
   text-align: left;
   font-family: Pretendard;
   font-size: 18px;
@@ -484,15 +715,52 @@ const ProgressBarTtitle = styled.text`
 const ProgressBarWrapper = styled.div`
   display: flex;
   flex-direction: column;
+  // width: 814px;
 `;
 
 const VerifiBoxWrapper = styled.div`
   display: flex;
   gap: 13px;
+  //margin-bottom: 48px;
 `;
 
 const ButtonsWrapper = styled.div`
   display: flex;
   gap: 18px;
-  margin-top: 34px;
+  margin-top: 130px;
+  //padding-left: 93px;
+  width: 630px;
+`;
+
+const ContentsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 796px;
+`;
+
+const SubContentsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: auto;
+  padding-top: 36.5px;
+`;
+
+const DividingLine = styled.div`
+  width: 860px;
+  height: 1px;
+  background: #dfdfdf;
+  position: absolute;
+  left: 0px;
+  top: 232px;
+`;
+
+const UploadBox = styled.div`
+  width: 628px;
+  height: 238px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px dashed #e57c90;
+  background: var(--White, #fff);
 `;
