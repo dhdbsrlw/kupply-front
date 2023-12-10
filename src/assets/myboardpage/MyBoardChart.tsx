@@ -341,7 +341,7 @@ const CustomTooltip: React.FC<CustomDatatipProps> = ({ activeData }) => {
         </Typography>
         <div style={{ display: 'flex', alignItems: 'baseline' }}>
           <Typography size="smallText" style={{ color: 'var(--Main-Black, #A8A8A8)', lineHeight: '22px' }}>
-            학점
+            학점 평균
           </Typography>
           <Typography
             size="smallText"
@@ -398,7 +398,7 @@ const PlotChartComponent = (props: MajorDataProps) => {
   const filteredMajorDatas = curMajorDatas.filter((d) => d.value !== 0);
 
   const maxValue = Math.max(...curMajorDatas.map((item) => item.value));
-  const maxLength = maxValue <= 50 ? 5 : maxValue / 10 + 1;
+  const maxLength = maxValue <= 10 ? 10 : maxValue / 10 + 1;
   const [hoveredData, setHoveredData] = useState<(typeof curMajorDatas)[0] | null>(null);
 
   return (
@@ -410,8 +410,8 @@ const PlotChartComponent = (props: MajorDataProps) => {
           dataKey="x"
           name="지원자 평균 학점"
           unit=""
-          domain={[0, 4.5]}
-          ticks={[0.5, 1.5, 2.5, 3.5, 4.5]}
+          domain={[2.5, 5.0]}
+          ticks={[2.5, 3.0, 3.5, 4.0, 4.5]}
         />
         <YAxis
           type="number"
@@ -419,7 +419,7 @@ const PlotChartComponent = (props: MajorDataProps) => {
           name="지원자"
           unit=""
           domain={[0, maxLength]}
-          ticks={Array.from({ length: maxLength + 1 }, (_, i) => i * 10)}
+          ticks={Array.from({ length: maxLength + 1 }, (_, i) => i * 1)} // 임시로 바꿈 (일반화 적용 X)
         />
         <Tooltip content={<CustomTooltip activeData={hoveredData} />} />
         {filteredMajorDatas.map((data, index) => (
