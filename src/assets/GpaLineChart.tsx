@@ -61,6 +61,23 @@ const getOrCreateTooltip = (chart: any) => {
     tooltipEl.style.transform = 'translate(-50%, 0)';
     tooltipEl.style.transition = 'all .1s ease';
 
+    tooltipEl.style.fontSize = '1.04vw';
+
+    // 말풍선의 화살표 만들기
+    const arrow = document.createElement('div');
+    arrow.style.content = '';
+    arrow.style.position = 'absolute';
+    arrow.style.width = '0';
+    arrow.style.height = '0';
+    arrow.style.borderLeft = '10px solid transparent';
+    arrow.style.borderRight = '10px solid transparent';
+    arrow.style.borderTop = '10px solid rgba(255, 255, 255, 1)'; // 말풍선의 화살표 색상
+    arrow.style.bottom = '-8px';
+    arrow.style.left = '50%';
+    arrow.style.transform = 'translateX(-50%)';
+
+    tooltipEl.appendChild(arrow);
+
     const table = document.createElement('table');
     table.style.margin = '5px';
 
@@ -181,13 +198,13 @@ const formattedModeData: (number | null)[] = Array.from({ length: 166 }, () => n
 const formattedMinData: (number | null)[] = Array.from({ length: 166 }, () => null);
 
 const meanGpaPoint = new Image(65, 65);
-meanGpaPoint.src = '../../design_image/previous_detail/meanGpaPoint.png';
+meanGpaPoint.src = '../../designImage/previous/MeanGpaPoint.png';
 const medianGpaPoint = new Image(65, 65);
-medianGpaPoint.src = '../../design_image/previous_detail/medianGpaPoint.png';
+medianGpaPoint.src = '../../designImage/previous/MedianGpaPoint.png';
 const modeGpaPoint = new Image(65, 65);
-modeGpaPoint.src = '../../design_image/previous_detail/modeGpaPoint.png';
+modeGpaPoint.src = '../../designImage/previous/ModeGpaPoint.png';
 const minGpaPoint = new Image(65, 65);
-minGpaPoint.src = '../../design_image/previous_detail/minGpaPoint.png';
+minGpaPoint.src = '../../designImage/previous/MinGpaPoint.png';
 
 const init = () => {
   for (let i = 0; i < 166; i++) {
@@ -346,7 +363,7 @@ export default function GpaLineChart(prop: GpaLineChartProps) {
       customTitle: {
         y: {
           display: true,
-          text: '합격자 수',
+          text: '지원자 수',
           offsetX: 13,
         },
         x: {
@@ -373,7 +390,7 @@ export default function GpaLineChart(prop: GpaLineChartProps) {
         callbacks: {
           title: function (tooltipItems: any) {
             if (+tooltipItems[0].label === meanGpa.gpa) {
-              return '합격생 학점 평균값';
+              return '합격자 평균 학점';
             } else if (+tooltipItems[0].label === medianGpa.gpa) {
               return '합격생 학점 중위값';
             } else if (+tooltipItems[0].label === modeGpa.gpa) {

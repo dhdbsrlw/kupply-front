@@ -5,157 +5,21 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import Logo from '../../assets/OldLogo';
 import HeaderButton from '../../assets/buttons/header/HeaderButton';
-import MailButton from '../../assets/buttons/header/MailButton';
-import SettingButton from '../../assets/buttons/header/SettingButton';
 import LabelButton from '../../assets/buttons/LabelButton';
 import React, { useCallback, useEffect, useState } from 'react';
-import client from '../../utils/httpClient';
-
-const Wrapper = styled.div`
-  align-items: center;
-  width: 100vw;
-  // max-width: 1920px;
-  //max-width: 1920px;
-  height: 80px; // 7.7%; // 96px; (96/1248 = 7.7)
-  position: fixed;
-  top: 0;
-  display: flex;
-  background: #fff;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-`;
-
-const FlexContainer = styled.div`
-  display: flex;
-  width: 100%;
-  // max-width: 1664px;
-  padding: 0 128px;
-  justify-content: space-between;
-`;
-
-const HeaderButtonContainer = styled.div`
-  display: flex;
-  gap: 2px;
-  margin-left: 37px;
-  align-items: center;
-  justify-content: center;
-`;
-
-const HeaderIconButtonContainer = styled.div`
-  display: flex;
-  gap: 26px;
-  align-items: center;
-  justify-content: center;
-`;
-
-const LeftButtonsContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const RightButtonsContainer = styled.div`
-  display: flex;
-
-  height: 36px;
-  padding: 8px;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-  flex-shrink: 0;
-
-  &:hover {
-    cursor: pointer;
-    color: #d85888;
-    svg path {
-      fill: #d85888;
-      stroke: #d85888;
-    }
-  }
-`;
-
-const SettingToggleWrapper = styled.div`
-  position: fixed;
-  top: 84px;
-  right: 100px;
-  width: 394px;
-  height: 490px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.9);
-
-  /* 5020 */
-  box-shadow: 0px 20px 50px 0px rgba(223, 223, 223, 0.4);
-  backdrop-filter: blur(9px);
-`;
-
-const Profile = styled.div`
-  width: 181.236px;
-  height: 180.867px;
-  margin-top: 55px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const ProfileText = styled.div`
-  color: var(--Main-Black, #141414);
-  font-family: Pretendard;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 700;
-  text-align: center;
-  line-height: 26px;
-
-  span {
-    color: rgba(20, 20, 20, 0.8);
-  }
-`;
-
-const ProfileButtons = styled.div`
-  margin-top: 30px;
-  width: 326px;
-  display: flex;
-  flex-direction: column;
-  gap: 35px;
-`;
-
-const ProfileButton = styled.div`
-  color: var(--Main-Black, #141414);
-  font-family: Pretendard;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 20px; /* 100% */
-  display: flex;
-  gap: 3px;
-  padding-left: 19px;
-
-  &:hover {
-    color: #14141499;
-    cursor: pointer;
-    svg path {
-      stroke: #14141499;
-    }
-
-    &.arrow {
-      fill: #14141499;
-    }
-  }
-`;
+import { client } from '../../utils/HttpClient';
+import { TextButton02, TextButton03LNB, TextButton06 } from '../../assets/buttons/TextButton';
+import { useRecoilState } from 'recoil';
+import { SBContentState } from '../../store/atom';
 
 export interface HeaderProps {
   logined: boolean;
   setLogin: (state: boolean) => void;
-  setSelected: (selected: number) => void;
+  //setSelected: (selected: number) => void;
 }
 
-export default function Header({ logined, setLogin, setSelected }: HeaderProps) {
+export default function Header({ logined, setLogin }: HeaderProps) {
+  const [selected, setSelected] = useRecoilState(SBContentState);
   const [cookies] = useCookies(['accessToken']);
   const accessToken = cookies.accessToken;
 
@@ -173,7 +37,7 @@ export default function Header({ logined, setLogin, setSelected }: HeaderProps) 
     },
     withCredentials: true,
   };
-  const [userData, setUserData] = useState({
+  const [userData, setUserData] = useState(() => ({
     userName: '',
     userNickname: '',
     userProfilePic: 'rectProfile1',
@@ -181,11 +45,11 @@ export default function Header({ logined, setLogin, setSelected }: HeaderProps) 
     userRole: 'candidate',
     firstMajor: '',
     studentId: '',
-    hopeMajor1: '',
-    hopeMajor2: '',
-    curGPA: 0,
-    hopeSemester: '',
-  });
+    hopeMajor1: '경영학과',
+    hopeMajor2: '컴퓨터학과',
+    curGPA: 4.5,
+    hopeSemester: '2023-2',
+  }));
   useEffect(() => {
     const getUserInfo = async () => {
       try {
@@ -209,12 +73,14 @@ export default function Header({ logined, setLogin, setSelected }: HeaderProps) 
             });
 
             localStorage.setItem('userProfilePic', userInfo.profilePic);
-            localStorage.setItem('userProfileLink', userInfo.profileLink);
+            //localStorage.setItem('userProfileLink', userInfo.profileLink);
             localStorage.setItem('name', userInfo.name);
             localStorage.setItem('nickname', userInfo.nickname);
             localStorage.setItem('studentId', userInfo.studentId);
             localStorage.setItem('firstMajor', userInfo.firstMajor);
             localStorage.setItem('role', userInfo.role);
+            localStorage.setItem('email', userInfo.email);
+            localStorage.setItem('campus', userInfo.campus);
             if (userInfo.role === 'candidate') {
               localStorage.setItem('hopeMajor1', userInfo.hopeMajor1);
               localStorage.setItem('hopeMajor2', userInfo.hopeMajor2);
@@ -235,25 +101,41 @@ export default function Header({ logined, setLogin, setSelected }: HeaderProps) 
 
     getUserInfo();
   }, [logined]);
+
   const navigate = useNavigate();
 
   const handleMenu1Click = () => {
-    navigate('/archive');
-  };
-  const handleMenu2Click = () => {
     if (logined) {
-      navigate('/myboard');
-    } // 로그인 상태
-    else {
+      navigate('/archive');
+    } else {
       const confirmation = window.confirm('로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.');
       if (confirmation) {
         navigate('/login');
       }
-      // 미로그인 상태
+    }
+  };
+  const handleMenu2Click = () => {
+    if (logined) {
+      navigate('/myboard');
+    } else {
+      const confirmation = window.confirm('로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.');
+      if (confirmation) {
+        navigate('/login');
+      }
     }
   };
   const handleMenu3Click = () => {
-    navigate('/landing');
+    if (logined) {
+      navigate('/landing');
+    } else {
+      const confirmation = window.confirm('로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.');
+      if (confirmation) {
+        navigate('/login');
+      }
+    }
+  };
+  const handleMenu4Click = () => {
+    navigate('/notice'); // TODO: 고객센터의 로그인 필요 여부에 대해 논의 필요
   };
   const handleSettingsClick = () => {
     setSelected(0);
@@ -319,7 +201,9 @@ export default function Header({ logined, setLogin, setSelected }: HeaderProps) 
     <Wrapper>
       <FlexContainer>
         <LeftButtonsContainer>
-          <Logo />
+          <LogoContainer>
+            <Logo />
+          </LogoContainer>
           <HeaderButtonContainer>
             <HeaderButton onClick={handleMenu3Click} activated={location.pathname === '/landing'}>
               실시간 지원현황
@@ -330,64 +214,51 @@ export default function Header({ logined, setLogin, setSelected }: HeaderProps) 
             <HeaderButton onClick={handleMenu2Click} activated={location.pathname === '/myboard'}>
               마이보드
             </HeaderButton>
-            <HeaderButton onClick={handleAdminClick} activated={location.pathname === '/admin'}>
+            {/* <HeaderButton onClick={handleMenu4Click} activated={location.pathname === '/notice'}>
+              고객센터
+            </HeaderButton> */}
+            {/* <HeaderButton onClick={handleAdminClick} activated={location.pathname === '/admin'}>
               관리자
-            </HeaderButton>
+            </HeaderButton> */}
           </HeaderButtonContainer>
         </LeftButtonsContainer>
-        {logined ? (
-          <>
-            <RightButtonsContainer onClick={handleToggle}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path
-                  d="M9 8.25C10.6569 8.25 12 6.90685 12 5.25C12 3.59315 10.6569 2.25 9 2.25C7.34315 2.25 6 3.59315 6 5.25C6 6.90685 7.34315 8.25 9 8.25Z"
-                  fill="#141414"
-                  stroke="#141414"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  className="door"
-                />
-                <path
-                  d="M15 15.75V14C15 13.0717 14.6839 12.1815 14.1213 11.5251C13.5587 10.8687 12.7956 10.5 12 10.5H6C5.20435 10.5 4.44129 10.8687 3.87868 11.5251C3.31607 12.1815 3 13.0717 3 14V15.75"
-                  fill="#141414"
-                  className="arrow"
-                />
-                <path
-                  d="M15 15.75V14C15 13.0717 14.6839 12.1815 14.1213 11.5251C13.5587 10.8687 12.7956 10.5 12 10.5H6C5.20435 10.5 4.44129 10.8687 3.87868 11.5251C3.31607 12.1815 3 13.0717 3 14V15.75H15Z"
-                  stroke="#141414"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              <strong>{`${userData.userNickname} `}</strong>님
-            </RightButtonsContainer>
-            {toggle && (
-              <SettingToggleWrapper ref={headerToggleRef}>
-                <Profile>
-                  <img
-                    src={
-                      userData.userProfilePic === 'customProfile'
-                        ? userData.userProfileLink
-                        : `design_image/character/rectProfile/${userData.userProfilePic}.png`
-                    }
-                    width={112}
-                    alt="profile"
-                  />
-                  <ProfileText>
-                    <strong>{userData.userNickname}</strong>
-                    <br />
-                    <span>{userData.userRole === 'candidate' ? '도전자 님' : '합격자 님'}</span>
-                  </ProfileText>
-                </Profile>
-                <ProfileButtons>
-                  <ProfileButton onClick={handleSettingsClick}>환경설정</ProfileButton>
-                  <ProfileButton onClick={handleMessageClick}>약관 보기</ProfileButton>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="328" height="2" viewBox="0 0 328 2" fill="none">
-                    <path d="M327 1.20996L0.999993 1.20996" stroke="#DFDFDF" stroke-linecap="round" />
-                  </svg>
-                  <ProfileButton onClick={onLogoutClick}>
+        <LoginContainer>
+          {logined ? (
+            <>
+              <TextButton06
+                fontSize="14px"
+                nickName={userData.userNickname}
+                onCustomFunction={handleToggle}
+              ></TextButton06>
+
+              {toggle && (
+                <SettingToggleWrapper ref={headerToggleRef}>
+                  <Profile>
+                    <img
+                      src={process.env.PUBLIC_URL + `/designImage/character/rectProfile/${userData.userProfilePic}.png`}
+                      width={112}
+                      alt="profile"
+                    />
+                    <ProfileText>
+                      <strong>{userData.userNickname}</strong>
+                      <br />
+                      <span>{userData.userRole === 'candidate' ? '도전자 님' : '합격자 님'}</span>
+                    </ProfileText>
+                  </Profile>
+                  <ProfileButtons>
+                    {/* <ProfileButton onClick={handleSettingsClick}>환경설정</ProfileButton>
+                  <ProfileButton onClick={handleMessageClick}>약관 보기</ProfileButton> */}
+                    <TextButton03LNB onClick={handleSettingsClick} style={{ paddingLeft: '19px' }}>
+                      환경설정
+                    </TextButton03LNB>
+                    <TextButton03LNB onClick={handleMessageClick} style={{ paddingLeft: '19px' }}>
+                      약관 보기
+                    </TextButton03LNB>
+
+                    <svg xmlns="http://www.w3.org/2000/svg" width="328" height="2" viewBox="0 0 328 2" fill="none">
+                      <path d="M327 1.20996L0.999993 1.20996" stroke="#DFDFDF" stroke-linecap="round" />
+                    </svg>
+                    {/* <ProfileButton onClick={onLogoutClick}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                       <path
                         fill-rule="evenodd"
@@ -405,17 +276,213 @@ export default function Header({ logined, setLogin, setSelected }: HeaderProps) 
                       />
                     </svg>
                     로그아웃
-                  </ProfileButton>
-                </ProfileButtons>
-              </SettingToggleWrapper>
-            )}
-          </>
-        ) : (
-          <LabelButton size="medium" buttonType="secondary" onClick={handleLoginClick}>
-            Log in
-          </LabelButton>
-        )}
+                  </ProfileButton> */}
+
+                    <TextButton02 onClick={onLogoutClick} style={{ paddingLeft: '0.989vw' }}>
+                      로그아웃
+                    </TextButton02>
+                  </ProfileButtons>
+                </SettingToggleWrapper>
+              )}
+            </>
+          ) : (
+            <LabelButton
+              className="login"
+              size="medium"
+              buttonType="secondary"
+              onClick={handleLoginClick}
+              style={{ display: 'flex', flexDirection: 'column' }}
+            >
+              Log in
+            </LabelButton>
+          )}
+        </LoginContainer>
       </FlexContainer>
     </Wrapper>
   );
 }
+
+const Wrapper = styled.div`
+  align-items: center;
+  width: 100vw;
+  // max-width: 1920px;
+  //max-width: 1920px;
+  height: 70px; // 7.7%; // 96px; (96/1248 = 7.7)
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  display: flex;
+  background: #fff;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const FlexContainer = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  // max-width: 1664px;
+  padding: 0 6.67vw;
+  justify-content: space-between;
+
+  @media screen and (max-width: 600px) {
+    padding: 0 16px;
+  }
+`;
+
+const HeaderButtonContainer = styled.div`
+  width: 80%;
+  display: flex;
+  padding: 0 2vw;
+  align-items: center;
+  justify-content: start;
+
+  @media screen and (max-width: 600px) {
+    display: flex;
+    flex-direction: row;
+    height: 45px; /* 아이템의 높이를 부모 요소에 맞춤 */
+    flex-basis: 100%; /* 아이템의 초기 크기를 100%로 설정하여 가로로 채우도록 함 */
+  }
+`;
+
+const LogoContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  @media screen and (max-width: 600px) {
+    height: 36px; /* 아이템의 높이를 부모 요소에 맞춤 */
+
+    & button {
+      height: 36px;
+    }
+
+    & img {
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+`;
+
+const LoginContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  & > button {
+    max-width: 120px;
+    white-space: nowrap;
+  }
+
+  .login {
+    height: 60%;
+    font-size: 16px;
+  }
+
+  @media screen and (max-width: 600px) {
+    height: 45px; /* 아이템의 높이를 부모 요소에 맞춤 */
+    width: 20%;
+    .login {
+      padding: 8px 16px;
+      height: 75%;
+      max-height: 36px;
+    }
+  }
+
+  //border: 1px solid black;
+`;
+
+const LeftButtonsContainer = styled.div`
+  width: 80%;
+  display: flex;
+  flex-direction: row;
+
+  align-items: center;
+  justify-content: space-between;
+
+  @media screen and (max-width: 600px) {
+    flex-wrap: wrap; /* 요소들을 여러 줄에 걸쳐 배치할 수 있도록 설정 */
+  }
+`;
+
+const SettingToggleWrapper = styled.div`
+  position: fixed;
+  top: 84px;
+  right: 100px;
+  width: 394px;
+  height: 490px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+
+  /* 5020 */
+  box-shadow: 0px 20px 50px 0px rgba(223, 223, 223, 0.4);
+  backdrop-filter: blur(9px);
+
+  @media screen and (max-width: 600px) {
+    top: 84px;
+    right: 10px;
+    width: 80vw;
+    height: 490px;
+  }
+`;
+
+const Profile = styled.div`
+  width: 181.236px;
+  height: 180.867px;
+  margin-top: 55px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const ProfileText = styled.div`
+  color: var(--Main-Black, #141414);
+  font-family: Pretendard;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  text-align: center;
+  line-height: 26px;
+
+  span {
+    color: rgba(20, 20, 20, 0.8);
+  }
+`;
+
+const ProfileButtons = styled.div`
+  margin-top: 30px;
+  width: 326px;
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+`;
+
+const ProfileButton = styled.div`
+  color: var(--Main-Black, #141414);
+  font-family: Pretendard;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px; /* 100% */
+  display: flex;
+  gap: 3px;
+  padding-left: 19px;
+
+  &:hover {
+    color: #14141499;
+    cursor: pointer;
+    svg path {
+      stroke: #14141499;
+    }
+
+    &.arrow {
+      fill: #14141499;
+    }
+  }
+`;

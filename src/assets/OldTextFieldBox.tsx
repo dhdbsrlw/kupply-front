@@ -2,14 +2,30 @@ import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { text } from 'stream/consumers';
 import styled, { css } from 'styled-components';
+import EyeIcon from './icons/OldEyeIcon';
+
+/* 
+  Width는 부모 요소(Wrapper)의 width를 따라갑니다.
+*/
 
 const baseWrapper = css`
   display: flex;
-  width: 592px;
-  height: 48px;
-  padding: 10px 18px;
-  gap: 10px;
-  border-radius: 10px;
+  width: 100%;
+
+  //height: 68px;
+  height: 3.542vw;
+  //padding: 10px 18px;
+  padding: 0.521vw 0.9375vw;
+  // gap: 10px;
+  // border-radius: 10px;
+  gap: 0.521vw; //10px;
+  border-radius: 0.521vw; //10px;
+  box-sizing: border-box;
+
+  & > img {
+    position: relative;
+    right: 0.521vw; //10px;
+  }
 `;
 
 const defaultWrapper = css`
@@ -66,42 +82,71 @@ const passwordWrapper = css`
 `;
 
 const PlaceHolder = styled.text`
+  width: 100%;
   color: #b9b9b9;
   font-family: Pretendard;
-  font-size: 18px;
+  font-size: 0.9375vw; //18px;
   font-weight: 500;
   font-style: normal;
-  line-height: 18px;
+  line-height: 100%;
   opacity: 0.8;
+  white-space: nowrap;
 `;
 
-const MessageBox = styled.div`
+const MessageBox = styled.div<{ isCheckDuplicated?: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 5px;
-  width: 520px;
+  width: 80%;
   height: 100%;
+  ${(props) =>
+    props.isCheckDuplicated &&
+    `
+    width: 60%;
+  `}
+`;
+
+const IconWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  flex-direction: row;
+  & > img {
+    position: relative;
+    right: 0.521vw; //10px;
+  }
+`;
+
+const IconBundler = styled.div`
+  position: relative;
+  right: 0.521vw; //10px;
+  display: flex;
+  flex-direction: row;
+
+  & > button {
+    margin-right: 0.417vw; //8px;
+  }
 `;
 
 const HelpMessage = styled.text`
-  width: 550.62px;
-  height: 12px;
+  width: 100%;
+  height: 0.625vw;
   color: #d85888;
   font-family: Pretendard;
-  font-size: 12px;
+  font-size: 0.625vw; //12px;
   font-style: normal;
   font-weight: 400;
-  line-height: 12px;
+  line-height: 100%;
 `;
 
 const Input = styled.input`
   color: #141414;
   font-family: Pretendard;
-  font-size: 18px;
+  font-size: 0.9375vw; //18px;
   font-style: normal;
   font-weight: 400;
-  line-height: 18px;
+  line-height: 100%;
   opacity: 0.8;
   border: none;
   outline: none;
@@ -110,29 +155,29 @@ const Input = styled.input`
 `;
 
 const CorrectText = styled.input`
-  width: 546px;
-  height: 18px;
-  font-size: 18px;
+  width: 80%;
+  height: 0.9375vw;
+  font-size: 0.9375vw; //18px;
   flex-shrink: 0;
   color: #d85888;
   font-family: Pretendard;
   font-style: normal;
   font-weight: 400;
-  line-height: 18px;
+  line-height: 100%;
   background: #fff;
   ${(props) => props.type === 'password' && 'color: black;'}
 `;
 
 const ErrorText = styled.input`
-  width: 500px;
-  height: 18px;
-  font-size: 18px;
+  width: 80%;
+  height: 0.9375vw;
+  font-size: 0.9375vw; //18px;
   flex-shrink: 0;
   color: #141414;
   font-family: Pretendard;
   font-style: normal;
   font-weight: 400;
-  line-height: 18px;
+  line-height: 100%;
   opacity: 0.8;
   background: #fff;
 `;
@@ -140,35 +185,84 @@ const ErrorText = styled.input`
 const ErrorMessageWrapper = styled.div`
   display: flex;
   align-items: center;
-  width: 592px;
-  height: 12px;
-  padding-top: 5px;
-  padding-left: 18px;
+  width: 100%;
+  min-width: 216px;
+  height: 0.625vw;
+  //padding-top: 5px;
+  padding-top: 0.26vw;
+  padding-left: 0.9375vw; //18px;
   gap: 4px;
   border: none;
   background: none;
+
+  & > img {
+    width: 0.625vw;
+    height: 0.625vw;
+  }
 `;
 
 const ErrorMessage = styled.text`
-  width: 550.62px;
+  width: 100%;
   color: #ea0909;
   font-family: Pretendard;
-  font-size: 12px;
+  font-size: 0.625vw; //12px;
   font-style: normal;
   font-weight: 400;
-  line-height: 12px;
+  line-height: 100%;
   opacity: 0.8;
 `;
 
-const EyeIcon = styled.div<{ state: string }>`
-  position: relative;
+const EyeIconWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   z-index: 1;
-  top: 2px;
-  ${(props) =>
-    props.state === 'error' &&
-    css`
-      left: 10px;
-    `}
+  right: 0.521vw; //10px;
+
+  & > img {
+    margin-left: 0.521vw; //10px;
+    width: 1.3vw;
+    height: 1.3vw;
+  }
+
+  & > button {
+    margin-right: 0.521vw; //10px;
+  }
+`;
+
+const CheckDuplicated = styled.button`
+  display: flex;
+  box-sizing: border-box;
+  min-width: 65px;
+  //width: 65px;
+  width: 3.385vw;
+  //height: 24px;
+  height: 1.25vw;
+  //padding: 4px 5px;
+  padding: 0.208vw 0.26vw;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: #d85888;
+
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 0.625vw; //12px;
+  font-style: normal;
+  font-weight: 500;
+  //line-height: 20px;
+  line-height: 1.042vw;
+  border-radius: 999px;
+  border: 1px solid #d85888;
+  color: #d85888;
+
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 0.625vw; //12px;
+  font-style: normal;
+  font-weight: 500;
+  //line-height: 20px;
+  line-height: 1.042vw;
 `;
 
 export type StateOptions = 'default' | 'hover' | 'focused' | 'typing' | 'filled' | 'error' | 'loading' | 'password';
@@ -190,6 +284,12 @@ export interface TextFieldBoxProps extends React.ComponentPropsWithoutRef<'input
   setValue: (value: string) => void;
   errorMessage?: string;
   helpMessage?: string;
+  validationMessage?: string;
+  type?: string;
+  value?: string;
+  placeholder?: string;
+  isCheckDuplicated?: boolean; // 중복체크 여부
+  valid?: boolean; // 입력값 유효성검증 통과여부 -> 부모 컴포넌트에서 onChange와 함께 전달
 }
 
 const TextFieldWrapper = styled.div<TextFieldBoxProps>`
@@ -198,7 +298,20 @@ const TextFieldWrapper = styled.div<TextFieldBoxProps>`
 `;
 
 function TextFieldBox(props: TextFieldBoxProps) {
-  const { state = 'default', setState, setValue, errorMessage = 'Invalid Message', helpMessage = '', ...rest } = props;
+  const {
+    state = 'default',
+    setState,
+    setValue,
+    errorMessage = 'Invalid Message',
+    helpMessage = '',
+    validationMessage = '',
+    type,
+    value,
+    placeholder,
+    isCheckDuplicated = false,
+    valid = true,
+    ...rest
+  } = props;
 
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -212,8 +325,14 @@ function TextFieldBox(props: TextFieldBoxProps) {
 
   const onMouseLeave = () => {
     if (state === 'hover') {
-      if (rest.value === '') setState('default');
-      else setState('filled');
+      if (value === '') setState('default');
+      else {
+        if (validationMessage && !valid) {
+          setState('error');
+        } else {
+          setState('filled');
+        }
+      }
     }
   };
 
@@ -223,19 +342,65 @@ function TextFieldBox(props: TextFieldBoxProps) {
 
   const onBlur = () => {
     if (state === 'focused') {
-      if (rest.value === '') setState('default');
-      else setState('filled');
+      if (value === '') setState('default');
+      else {
+        if (validationMessage !== '' && !valid) {
+          setState('error');
+        } else {
+          setState('filled');
+        }
+      }
     }
   };
 
+  const onCheckDuplicated = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
+    if (Math.random() > 0.5) {
+      // 중복 아닐 경우
+      if (valid) setState('filled');
+      else setState('error');
+    } else {
+      // 증복일 경우
+      setState('error');
+    }
+    alert('중복 체크');
+  };
+
+  const changeTextTypeToText = (e: React.MouseEvent<SVGElement, MouseEvent> | React.TouchEvent<SVGElement>) => {
+    e.preventDefault();
+    setTextType('text');
+  };
+
+  const changeTextTypeToPW = (e: React.MouseEvent<SVGElement, MouseEvent> | React.TouchEvent<SVGElement>) => {
+    e.preventDefault();
+    setTextType('password');
+  };
+
+  const XCircle = () => {
+    return (
+      <img
+        src="../../designImage/textField/XCircle.png"
+        width="24px"
+        height="24px"
+        onMouseDown={() => {
+          setValue('');
+        }}
+      />
+    );
+  };
+
   useEffect(() => {
-    if (rest.type === 'password') setTextType('password');
+    if (type === 'password') setTextType('password');
+
+    if (value === '') setState('default');
+    else setState('filled');
   }, []);
 
   useEffect(() => {
     const handleDocumentClick = (e: MouseEvent) => {
       if (ref.current !== null && !ref.current.contains(e.target as Node) && state === 'focused') {
-        if (rest.value === '') setState('default');
+        if (value === '') setState('default');
         else setState('filled');
       }
     };
@@ -245,7 +410,7 @@ function TextFieldBox(props: TextFieldBoxProps) {
     return () => {
       window.removeEventListener('click', handleDocumentClick);
     };
-  }, [rest.value, state, setState]);
+  }, [value, state, setState]);
 
   return (
     <>
@@ -261,176 +426,117 @@ function TextFieldBox(props: TextFieldBoxProps) {
         tabIndex={rest.tabIndex || 0}
       >
         {state === 'default' || state === 'hover' ? (
-          <PlaceHolder>{rest.placeholder}</PlaceHolder>
+          <>
+            <PlaceHolder>{placeholder}</PlaceHolder>
+            {isCheckDuplicated && <CheckDuplicated onMouseDown={onCheckDuplicated}>중복 확인</CheckDuplicated>}
+          </>
         ) : state === 'focused' ? (
           <>
-            <MessageBox>
-              <HelpMessage>{helpMessage}</HelpMessage>
-              <Input value={rest.value} onChange={rest.onChange} type={textType} autoFocus />
+            <MessageBox isCheckDuplicated={isCheckDuplicated}>
+              {helpMessage && <HelpMessage>{helpMessage}</HelpMessage>}
+              <Input value={value} onChange={rest.onChange} type={textType} autoFocus onKeyDown={rest.onKeyDown} />
             </MessageBox>
             {textType === 'password' ? (
-              <EyeIcon
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  setTextType('text');
-                }}
-                state={state}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z"
-                    stroke="#A8A8A8"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
-                    stroke="#A8A8A8"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </EyeIcon>
+              <EyeIconWrapper>
+                <EyeIcon onMouseDown={changeTextTypeToText} onTouchStart={changeTextTypeToText} type="on" />
+                <XCircle />
+              </EyeIconWrapper>
             ) : textType === 'text' ? (
-              <EyeIcon
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  setTextType('password');
-                }}
-                state={state}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="23" viewBox="0 0 24 24" fill="none">
-                  <g clip-path="url(#clip0_2389_1254)">
-                    <path
-                      d="M9.9 4.24002C10.5883 4.0789 11.2931 3.99836 12 4.00003C19 4.00003 23 12 23 12C22.393 13.1356 21.6691 14.2048 20.84 15.19M14.12 14.12C13.8454 14.4148 13.5141 14.6512 13.1462 14.8151C12.7782 14.9791 12.3809 15.0673 11.9781 15.0744C11.5753 15.0815 11.1752 15.0074 10.8016 14.8565C10.4281 14.7056 10.0887 14.4811 9.80385 14.1962C9.51897 13.9113 9.29439 13.572 9.14351 13.1984C8.99262 12.8249 8.91853 12.4247 8.92563 12.0219C8.93274 11.6191 9.02091 11.2219 9.18488 10.8539C9.34884 10.4859 9.58525 10.1547 9.88 9.88003M17.94 17.94C16.2306 19.243 14.1491 19.9649 12 20C5 20 1 12 1 12C2.24389 9.68192 3.96914 7.65663 6.06 6.06003L17.94 17.94Z"
-                      stroke="#A8A8A8"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <path
-                      d="M1 1L23 23"
-                      stroke="#A8A8A8"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_2389_1254">
-                      <rect width="24" height="24" fill="white" />
-                    </clipPath>
-                  </defs>
-                </svg>
-              </EyeIcon>
+              <EyeIconWrapper>
+                {isCheckDuplicated && <CheckDuplicated onMouseDown={onCheckDuplicated}>중복 확인</CheckDuplicated>}
+                <EyeIcon onMouseDown={changeTextTypeToPW} onTouchStart={changeTextTypeToPW} type="off" />
+                <XCircle />
+              </EyeIconWrapper>
             ) : (
-              <></>
+              <EyeIconWrapper>
+                {isCheckDuplicated && <CheckDuplicated onMouseDown={onCheckDuplicated}>중복 확인</CheckDuplicated>}
+                <XCircle />
+              </EyeIconWrapper>
             )}
-            <img
-              src="../../design_image/text_field/x_circle.png"
-              width="24px"
-              height="24px"
-              onMouseDown={() => {
-                setValue('');
-              }}
-            />
           </>
         ) : state === 'typing' ? (
           <>
-            <MessageBox>
-              <HelpMessage>{helpMessage}</HelpMessage>
+            <MessageBox isCheckDuplicated={isCheckDuplicated}>
+              {helpMessage && <HelpMessage>{helpMessage}</HelpMessage>}
               <Input {...rest} />
             </MessageBox>
-            <img src="../../design_image/text_field/x_circle.png" width="28px" height="28px" />
+            <XCircle />
           </>
         ) : state === 'filled' ? (
           <>
-            <CorrectText type={rest.type} value={rest.value} disabled></CorrectText>
-            <img src="../../design_image/text_field/check_circle.png" width="24px" height="24px" />
+            <IconWrapper>
+              <CorrectText type={textType} value={value} disabled></CorrectText>
+              {textType === 'password' ? (
+                <EyeIconWrapper>
+                  {isCheckDuplicated && <CheckDuplicated onMouseDown={onCheckDuplicated}>중복 확인</CheckDuplicated>}
+                  <EyeIcon onMouseDown={changeTextTypeToText} onTouchStart={changeTextTypeToText} type="on" />
+                  {valid ? (
+                    <img src="../../designImage/textField/CheckCircle96.png" />
+                  ) : (
+                    <img src="../../designImage/textField/AlertCircle.png" />
+                  )}
+                </EyeIconWrapper>
+              ) : textType === 'text' ? (
+                <EyeIconWrapper>
+                  {isCheckDuplicated && <CheckDuplicated onMouseDown={onCheckDuplicated}>중복 확인</CheckDuplicated>}
+                  <EyeIcon onMouseDown={changeTextTypeToPW} onTouchStart={changeTextTypeToPW} type="off" />
+                  {valid ? (
+                    <img src="../../designImage/textField/CheckCircle96.png" />
+                  ) : (
+                    <img src="../../designImage/textField/AlertCircle.png" />
+                  )}
+                </EyeIconWrapper>
+              ) : (
+                <EyeIconWrapper>
+                  {valid ? (
+                    <img src="../../designImage/textField/CheckCircle96.png" />
+                  ) : (
+                    <img src="../../designImage/textField/AlertCircle.png" />
+                  )}
+                </EyeIconWrapper>
+              )}
+            </IconWrapper>
           </>
         ) : state === 'error' ? (
           <>
-            <ErrorText type={textType} value={rest.value} disabled></ErrorText>
+            <ErrorText type={textType} value={value} disabled></ErrorText>
             {textType === 'password' ? (
-              <EyeIcon
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  setTextType('text');
-                }}
-                state={state}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z"
-                    stroke="#A8A8A8"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
-                    stroke="#A8A8A8"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </EyeIcon>
+              <EyeIconWrapper>
+                <EyeIcon onMouseDown={changeTextTypeToText} onTouchStart={changeTextTypeToText} type="on" />
+                <img src="../../designImage/textField/AlertCircle.png" />
+              </EyeIconWrapper>
             ) : textType === 'text' ? (
-              <EyeIcon
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  setTextType('password');
-                }}
-                state={state}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="23" viewBox="0 0 24 24" fill="none">
-                  <g clip-path="url(#clip0_2389_1254)">
-                    <path
-                      d="M9.9 4.24002C10.5883 4.0789 11.2931 3.99836 12 4.00003C19 4.00003 23 12 23 12C22.393 13.1356 21.6691 14.2048 20.84 15.19M14.12 14.12C13.8454 14.4148 13.5141 14.6512 13.1462 14.8151C12.7782 14.9791 12.3809 15.0673 11.9781 15.0744C11.5753 15.0815 11.1752 15.0074 10.8016 14.8565C10.4281 14.7056 10.0887 14.4811 9.80385 14.1962C9.51897 13.9113 9.29439 13.572 9.14351 13.1984C8.99262 12.8249 8.91853 12.4247 8.92563 12.0219C8.93274 11.6191 9.02091 11.2219 9.18488 10.8539C9.34884 10.4859 9.58525 10.1547 9.88 9.88003M17.94 17.94C16.2306 19.243 14.1491 19.9649 12 20C5 20 1 12 1 12C2.24389 9.68192 3.96914 7.65663 6.06 6.06003L17.94 17.94Z"
-                      stroke="#A8A8A8"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <path
-                      d="M1 1L23 23"
-                      stroke="#A8A8A8"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_2389_1254">
-                      <rect width="24" height="24" fill="white" />
-                    </clipPath>
-                  </defs>
-                </svg>
-              </EyeIcon>
+              <EyeIconWrapper>
+                <EyeIcon onMouseDown={changeTextTypeToPW} onTouchStart={changeTextTypeToPW} type="off" />
+                <img src="../../designImage/textField/AlertCircle.png" />
+              </EyeIconWrapper>
             ) : (
-              <></>
+              <EyeIconWrapper>
+                <img src="../../designImage/textField/AlertCircle.png" />
+              </EyeIconWrapper>
             )}
-            <img src="../../design_image/text_field/alert_circle.png" width="28px" height="28px" />
+            {/* <img src="../../designImage/textField/AlertCircle.png" width="24px" height="24px" /> */}
           </>
         ) : state === 'loading' ? (
           <>
-            <CorrectText>{rest.value}</CorrectText>
-            <img src="../../design_image/text_field/loading.png" width="28px" height="28px" />
+            <CorrectText>{value}</CorrectText>
+            <img src="../../designImage/textField/Loading.png" width="28px" height="28px" />
           </>
         ) : (
           <></>
         )}
       </TextFieldWrapper>
-      {state === 'error' ? (
+      {state === 'error' && (
         <ErrorMessageWrapper>
-          <img src="../../design_image/text_field/x.png" width="12px" height="12px" />
+          <img src="../../designImage/textField/X.png" width="12px" height="12px" />
           <ErrorMessage>{errorMessage}</ErrorMessage>
         </ErrorMessageWrapper>
-      ) : (
-        <></>
+      )}
+      {state === 'focused' && !valid && (
+        <ErrorMessageWrapper>
+          <img src="../../designImage/textField/AlertCircle.png" width="12px" height="12px" />
+          <ErrorMessage>{validationMessage}</ErrorMessage>
+        </ErrorMessageWrapper>
       )}
     </>
   );

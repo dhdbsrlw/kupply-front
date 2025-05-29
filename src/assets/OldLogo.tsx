@@ -7,9 +7,8 @@ const LogoWrapper = styled.button`
   align-items: center; // 수직 중앙
   border: none;
   background: none;
-  width: 188px;
+  padding: 0 16px;
   height: 46px;
-  gap: 8.418px;
   flex-shrink: 0;
 `;
 
@@ -29,8 +28,8 @@ const LogoTextWrapper = styled.text`
 */
 
 const LogoImage = styled.img`
-  width: 188px; // 46.575px;
-  height: 46px; // 46px;
+  width: 130px; // 46.575px;
+  height: 29px; // 46px;
   border: none;
 `;
 
@@ -41,7 +40,7 @@ function Logo() {
   };
   return (
     <LogoWrapper onClick={LogoWrapperClick}>
-      <LogoImage src="../../design_image/Kupply_ver1.png" />
+      <LogoImage src="../../designImage/kupply/KupplyVer1.svg" />
     </LogoWrapper>
   );
 }
